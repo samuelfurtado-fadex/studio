@@ -16,22 +16,31 @@ import {
 } from '@/components/ui/sidebar';
 import { Icons } from '@/components/icons';
 import { UserNav } from '@/components/user-nav';
-import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
   Users,
-  FolderKanban,
   Bell,
   FileJson,
   LogOut,
+  MessageSquare,
+  Mail,
+  List,
+  Cog,
+  FileText,
+  Workflow
 } from 'lucide-react';
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/coordenadores', icon: Users, label: 'Coordenadores' },
-  { href: '/projetos', icon: FolderKanban, label: 'Projetos' },
-  { href: '/alertas', icon: Bell, label: 'Alertas de Vencimento' },
-  { href: '/matriz', icon: FileJson, label: 'Matriz de Decisão' },
+  { href: '/supridor', icon: Users, label: 'Supridor' },
+  { href: '/notificacao', icon: Bell, label: 'Notificação' },
+  { href: '/visaogeral', icon: FileText, label: 'Visão Geral' },
+  { href: '/atuomacao', icon: Cog, label: 'Atuomação' },
+  { href: '/whatsapp', icon: MessageSquare, label: 'Whatsapp' },
+  { href: '/sms', icon: MessageSquare, label: 'SMS' },
+  { href: '/email', icon: Mail, label: 'E-mail' },
+  { href: '/pipeline', icon: Workflow, label: 'Pipeline' },
+  { href: '/matriz', icon: FileJson, label: 'Matriz de decisão' },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -41,9 +50,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <Icons.logo className="h-6 w-6" />
-            <span className="text-lg font-semibold">FADEX</span>
+          <div className="flex items-center gap-2 p-4">
+            <Icons.logo className="h-8 w-auto text-white" />
           </div>
         </SidebarHeader>
         <SidebarContent>
