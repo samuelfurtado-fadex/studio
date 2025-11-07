@@ -10,7 +10,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
@@ -21,12 +20,6 @@ import {
   Users,
   Bell,
   FileJson,
-  LogOut,
-  MessageSquare,
-  Mail,
-  List,
-  Cog,
-  FileText,
   Workflow
 } from 'lucide-react';
 
@@ -65,14 +58,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             ))}
           </SidebarMenu>
         </SidebarContent>
-        <SidebarFooter>
-          <Link href="/login">
-            <SidebarMenuButton>
-              <LogOut />
-              <span>Sair</span>
-            </SidebarMenuButton>
-          </Link>
-        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
