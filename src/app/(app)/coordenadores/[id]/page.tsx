@@ -1,6 +1,9 @@
+'use client';
+
 import { notFound } from "next/navigation";
 import Image from "next/image";
-import { Phone, Mail, User, Briefcase, DollarSign, History, Send } from "lucide-react";
+import Link from "next/link";
+import { Phone, Mail, User, Briefcase, DollarSign, History, Send, MessageCircle } from "lucide-react";
 
 import { coordinators, projects, debts } from "@/lib/data";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -9,6 +12,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -24,6 +35,12 @@ export default function CoordinatorProfilePage({ params }: { params: { id: strin
   const coordinatorProjects = projects.filter(p => p.coordinatorId === coordinator.id);
   const coordinatorDebts = debts.filter(d => d.coordinatorName === coordinator.name);
   const avatarImage = PlaceHolderImages.find(img => img.id === coordinator.avatar);
+
+  const whatsappMessage = encodeURIComponent(`Olá ${coordinator.name}, há pendências financeiras em seu nome. Por favor, verifique a plataforma.`);
+  const emailSubject = encodeURIComponent(`Notificação de Pendência Financeira`);
+  const emailBody = encodeURIComponent(`Prezado(a) ${coordinator.name},\n\nConstatamos que há pendências financeiras associadas ao seu perfil em nossa plataforma. \n\nPor favor, acesse o sistema para mais detalhes e regularização.\n\nAtenciosamente,\nEquipe Financeira FADEX`);
+  const phoneNumber = coordinator.phone.replace(/\D/g, '');
+
 
   return (
     <>
@@ -68,9 +85,33 @@ export default function CoordinatorProfilePage({ params }: { params: { id: strin
                     <p className="text-sm text-muted-foreground">Saldo Disponível</p>
                     <p className="text-lg font-bold text-emerald-600">{formatCurrency(coordinator.availableBalance)}</p>
                 </div>
-                <Button className="w-full">
-                  <Send className="mr-2 h-4 w-4" /> Enviar Notificação
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="w-full">
+                      <Send className="mr-2 h-4 w-4" /> Enviar Notificação
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle>Enviar Notificação</DialogTitle>
+                      <DialogDescription>
+                        Escolha o canal para notificar o coordenador sobre suas pendências financeiras.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2">
+                        <Button variant="outline" asChild>
+                           <Link href={`https://wa.me/${phoneNumber}?text=${whatsappMessage}`} target="_blank">
+                                <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+                           </Link>
+                        </Button>
+                         <Button variant="outline" asChild>
+                            <Link href={`mailto:${coordinator.email}?subject=${emailSubject}&body=${emailBody}`}>
+                                <Mail className="mr-2 h-4 w-4" /> E-mail
+                            </Link>
+                        </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
             </CardContent>
           </Card>
         </div>
