@@ -5,16 +5,23 @@ import { PageHeader } from "@/components/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, Download, CheckCircle, XCircle, AlertTriangle, Info } from "lucide-react";
-import { projects, coordinators, type Project } from "@/lib/data";
+import { Search, Info, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { projects, type Project } from "@/lib/data";
+
+type SupplyInfo = {
+    count: number;
+    value: number;
+};
 
 type SearchResult = {
     project: Project;
-    overdueSupplies: {
-        count: number;
-        value: number;
-    }
-}
+    openSupplies: SupplyInfo;
+    overdueSupplies: SupplyInfo;
+};
+
+const formatCurrency = (value: number) => {
+    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};
 
 export default function MatrizPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -25,12 +32,16 @@ export default function MatrizPage() {
         const project = projects.find(p => p.code.toLowerCase() === searchQuery.toLowerCase());
         setSearched(true);
         if (project) {
-            // Mock data for overdue supplies
+            // Mock data for supplies
+            const openSupplies = {
+                count: project.openSupplies,
+                value: project.openSupplies * (project.code === 'PROJ-005' ? 450 : 250.75), // Mock value
+            };
             const overdueSupplies = {
                 count: project.code === 'PROJ-005' ? 2 : 0,
                 value: project.code === 'PROJ-005' ? 1250.00 : 0,
             };
-            setSearchResult({ project, overdueSupplies });
+            setSearchResult({ project, openSupplies, overdueSupplies });
         } else {
             setSearchResult(null);
         }
@@ -43,7 +54,7 @@ export default function MatrizPage() {
        <p className="text-sm text-muted-foreground -mt-4 mb-6">
             Consulte a viabilidade de novos suprimentos para um projeto.
         </p>
-      <Card className="mb-6 max-w-2xl mx-auto">
+      <Card className="mb-6 max-w-3xl mx-auto">
         <CardHeader>
           <CardTitle>Consultar Projeto</CardTitle>
           <CardDescription>Insira o código único do projeto para obter uma análise.</CardDescription>
@@ -65,14 +76,14 @@ export default function MatrizPage() {
       </Card>
 
       {searched && (
-        <Card className="max-w-2xl mx-auto mt-6">
+        <Card className="max-w-3xl mx-auto mt-6">
              <CardHeader>
                 <CardTitle>Resultado da Análise</CardTitle>
              </CardHeader>
              <CardContent>
                 {searchResult ? (
                     <div className="space-y-6">
-                        <div className="grid gap-6 sm:grid-cols-2">
+                        <div className="grid gap-4 sm:grid-cols-2 mb-6">
                             <div className="space-y-1">
                                 <p className="text-sm font-medium text-muted-foreground">Nome do Projeto</p>
                                 <p className="font-semibold">{searchResult.project.name}</p>
@@ -81,11 +92,7 @@ export default function MatrizPage() {
                                 <p className="text-sm font-medium text-muted-foreground">Código do Projeto</p>
                                 <p className="font-semibold">{searchResult.project.code}</p>
                             </div>
-                            <div className="space-y-1">
-                                <p className="text-sm font-medium text-muted-foreground">Suprimentos em Aberto</p>
-                                <p className="font-semibold">{searchResult.project.openSupplies}</p>
-                            </div>
-                            <div className="space-y-1">
+                            <div className="space-y-1 col-span-full">
                                 <p className="text-sm font-medium text-muted-foreground">Pode Criar Novo Suprimento?</p>
                                 <div className="flex items-center gap-2">
                                     {searchResult.project.canCreateNewSupply ? (
@@ -98,14 +105,32 @@ export default function MatrizPage() {
                                     </p>
                                 </div>
                             </div>
-                             <div className="space-y-1 col-span-full">
-                                <p className="text-sm font-medium text-muted-foreground">Suprimentos com mais de 45 dias de atraso</p>
-                                <div className='flex gap-4'>
-                                    <p className="font-semibold">{searchResult.overdueSupplies.count} itens</p>
-                                    <p className="font-semibold text-destructive">{searchResult.overdueSupplies.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Open Supplies */}
+                            <div className="rounded-lg border bg-green-50/50">
+                                <h4 className="font-semibold p-3 border-b bg-green-100/60 rounded-t-lg text-green-900">Suprimento em Aberto</h4>
+                                <div className="p-3 grid grid-cols-[120px_1fr] items-center">
+                                    <div className="font-medium text-sm text-green-800 bg-green-200/60 p-2 rounded-l-md h-full flex items-center">Quantidade</div>
+                                    <div className="p-2 border-t border-r border-b rounded-r-md">{searchResult.openSupplies.count} itens</div>
+                                    <div className="font-medium text-sm text-green-800 bg-green-200/60 p-2 rounded-l-md h-full flex items-center border-t">Valor</div>
+                                    <div className="p-2 border-r border-b rounded-r-md">{formatCurrency(searchResult.openSupplies.value)}</div>
+                                </div>
+                            </div>
+
+                            {/* Overdue Supplies */}
+                             <div className="rounded-lg border bg-yellow-50/50">
+                                <h4 className="font-semibold p-3 border-b bg-yellow-100/60 rounded-t-lg text-yellow-900">Suprimento mais de 45 dias</h4>
+                                <div className="p-3 grid grid-cols-[120px_1fr] items-center">
+                                    <div className="font-medium text-sm text-yellow-800 bg-yellow-200/60 p-2 rounded-l-md h-full flex items-center">Quantidade</div>
+                                    <div className="p-2 border-t border-r border-b rounded-r-md">{searchResult.overdueSupplies.count} itens</div>
+                                    <div className="font-medium text-sm text-yellow-800 bg-yellow-200/60 p-2 rounded-l-md h-full flex items-center border-t">Valor</div>
+                                    <div className={`p-2 border-r border-b rounded-r-md ${searchResult.overdueSupplies.value > 0 ? 'text-destructive' : ''}`}>{formatCurrency(searchResult.overdueSupplies.value)}</div>
                                 </div>
                             </div>
                         </div>
+
                         {!searchResult.project.canCreateNewSupply && (
                              <div className="rounded-lg border bg-destructive/10 p-4 text-sm text-destructive border-destructive/30">
                                 <div className="flex items-start gap-3">
