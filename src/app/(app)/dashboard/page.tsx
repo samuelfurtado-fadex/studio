@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
-import { addDays, format } from "date-fns";
+import { addDays, format, startOfMonth } from "date-fns";
 
 const chartConfig: ChartConfig = {
   debts: {
@@ -60,9 +60,20 @@ export default function DashboardPage() {
   });
   
   const filteredDailyData = dailyDebtData.filter(item => {
-    if (!dailyDate?.from || !dailyDate?.to) return true;
-    const itemDate = new Date(new Date().getFullYear(), 0, item.day);
-    return itemDate >= dailyDate.from && itemDate <= dailyDate.to;
+    if (!dailyDate?.from) return true;
+    const itemDate = new Date(dailyDate.from.getFullYear(), dailyDate.from.getMonth(), item.day);
+    itemDate.setHours(0, 0, 0, 0);
+
+    const fromDate = new Date(dailyDate.from);
+    fromDate.setHours(0,0,0,0);
+    
+    if (dailyDate.to) {
+        const toDate = new Date(dailyDate.to);
+        toDate.setHours(0,0,0,0);
+        return itemDate >= fromDate && itemDate <= toDate;
+    }
+    
+    return itemDate.getTime() === fromDate.getTime();
   });
 
   const filteredMonthlyData = monthlyDebtData.filter(item => {
@@ -70,7 +81,11 @@ export default function DashboardPage() {
     const monthIndex = monthMap[item.month];
     if (monthIndex === undefined) return false;
     const itemDate = new Date(new Date().getFullYear(), monthIndex, 1);
-    return itemDate >= monthlyDate.from && itemDate <= monthlyDate.to;
+    
+    const fromDate = startOfMonth(monthlyDate.from);
+    const toDate = startOfMonth(monthlyDate.to);
+
+    return itemDate >= fromDate && itemDate <= toDate;
   });
 
   const handleChartClick = (data: any) => {
@@ -84,7 +99,11 @@ export default function DashboardPage() {
       const debtForDay = debts.find(d => {
         const dueDate = new Date(d.dueDate);
         dueDate.setHours(0, 0, 0, 0);
-        return dueDate.getDate() === clickedDay;
+        
+        // This is a simplification. In a real scenario, you'd match the full date.
+        // Here, we just match the day of the month from the clicked chart item.
+        return dueDate.getDate() === clickedDay && 
+               dueDate.getMonth() === (dailyDate?.from?.getMonth() ?? today.getMonth());
       });
 
       if (debtForDay) {
