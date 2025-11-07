@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { PageHeader } from "@/components/page-header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, Info, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Search, Info, CheckCircle, XCircle, AlertTriangle, ArrowRight } from "lucide-react";
 import { projects, type Project } from "@/lib/data";
 
 type SupplyInfo = {
@@ -77,8 +78,15 @@ export default function MatrizPage() {
 
       {searched && (
         <Card className="max-w-3xl mx-auto mt-6">
-             <CardHeader>
+             <CardHeader className="flex-row items-center justify-between">
                 <CardTitle>Resultado da Análise</CardTitle>
+                 {searchResult && (
+                    <Button asChild variant="outline" size="sm">
+                        <Link href={`/projetos/${searchResult.project.id}`}>
+                            Ver Detalhes do Projeto <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
+                )}
              </CardHeader>
              <CardContent>
                 {searchResult ? (
