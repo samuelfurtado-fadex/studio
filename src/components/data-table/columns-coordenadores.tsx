@@ -62,9 +62,6 @@ export const columns: ColumnDef<Coordinator>[] = [
             <DropdownMenuItem asChild>
                 <Link href={`/coordenadores/${coordinator.id}`}>Ver perfil detalhado</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(coordinator.email)}>
-              Copiar E-mail
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
