@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { PageHeader } from "@/components/page-header";
 import { monthlyDebtData, dailyDebtData } from "@/lib/data";
-import { BalanceForecast } from "@/components/dashboard/balance-forecast";
 
 const chartConfig: ChartConfig = {
   debts: {
@@ -108,9 +107,6 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
-        <div className="lg:col-span-7">
-          <BalanceForecast />
-        </div>
       </div>
     </>
   );
