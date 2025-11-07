@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { FolderKanban, TrendingUp, TrendingDown, Users, AlertTriangle } from "lucide-react";
+import { FolderKanban, TrendingUp, TrendingDown, Users, AlertTriangle, Calendar as CalendarIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { PageHeader } from "@/components/page-header";
@@ -14,6 +14,11 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { DateRange } from "react-day-picker";
+import { addDays, format } from "date-fns";
 
 const chartConfig: ChartConfig = {
   debts: {
@@ -29,6 +34,11 @@ const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 };
 
+const monthMap: { [key: string]: number } = {
+  'Jan': 0, 'Fev': 1, 'Mar': 2, 'Abr': 3, 'Mai': 4, 'Jun': 5,
+  'Jul': 6, 'Ago': 7, 'Set': 8, 'Out': 9, 'Nov': 10, 'Dez': 11
+};
+
 export default function DashboardPage() {
   const totalPending = 9850.50;
   const totalAvailable = 39950.75;
@@ -39,21 +49,41 @@ export default function DashboardPage() {
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const [dailyDate, setDailyDate] = useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 30),
+  });
+
+  const [monthlyDate, setMonthlyDate] = useState<DateRange | undefined>({
+    from: new Date(new Date().getFullYear(), 0, 1),
+    to: new Date(new Date().getFullYear(), 11, 31),
+  });
+  
+  const filteredDailyData = dailyDebtData.filter(item => {
+    if (!dailyDate?.from || !dailyDate?.to) return true;
+    const itemDate = new Date(new Date().getFullYear(), 0, item.day);
+    return itemDate >= dailyDate.from && itemDate <= dailyDate.to;
+  });
+
+  const filteredMonthlyData = monthlyDebtData.filter(item => {
+    if (!monthlyDate?.from || !monthlyDate?.to) return true;
+    const monthIndex = monthMap[item.month];
+    if (monthIndex === undefined) return false;
+    const itemDate = new Date(new Date().getFullYear(), monthIndex, 1);
+    return itemDate >= monthlyDate.from && itemDate <= monthlyDate.to;
+  });
+
   const handleChartClick = (data: any) => {
     if (data && data.activePayload && data.activePayload.length > 0) {
       const payload = data.activePayload[0].payload;
       const clickedDay = payload.day;
       
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize today's date
+      today.setHours(0, 0, 0, 0);
 
-      // Find a debt that matches the clicked day. 
-      // This is a simple mock logic. In a real scenario, you'd fetch data for the exact date.
       const debtForDay = debts.find(d => {
         const dueDate = new Date(d.dueDate);
         dueDate.setHours(0, 0, 0, 0);
-        // This is a mock logic to associate a chart day with a debt
-        // It takes the day of the month from the due date
         return dueDate.getDate() === clickedDay;
       });
 
@@ -128,13 +158,45 @@ export default function DashboardPage() {
 
       <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-7">
         <Card className="lg:col-span-4">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className="w-[280px] justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {monthlyDate?.from ? (
+                    monthlyDate.to ? (
+                      <>
+                        {format(monthlyDate.from, "LLL y")} -{" "}
+                        {format(monthlyDate.to, "LLL y")}
+                      </>
+                    ) : (
+                      format(monthlyDate.from, "LLL y")
+                    )
+                  ) : (
+                    <span>Escolha um período</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={monthlyDate?.from}
+                  selected={monthlyDate}
+                  onSelect={setMonthlyDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer>
-                <BarChart data={monthlyDebtData}>
+                <BarChart data={filteredMonthlyData}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value / 1000}k`} />
@@ -146,13 +208,45 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         <Card className="lg:col-span-3">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Acompanhamento de Dívidas (Diário)</CardTitle>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className="w-[280px] justify-start text-left font-normal"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dailyDate?.from ? (
+                    dailyDate.to ? (
+                      <>
+                        {format(dailyDate.from, "dd/MM/y")} -{" "}
+                        {format(dailyDate.to, "dd/MM/y")}
+                      </>
+                    ) : (
+                      format(dailyDate.from, "dd/MM/y")
+                    )
+                  ) : (
+                    <span>Escolha um período</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dailyDate?.from}
+                  selected={dailyDate}
+                  onSelect={setDailyDate}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer>
-                <LineChart data={dailyDebtData} onClick={handleChartClick}>
+                <LineChart data={filteredDailyData} onClick={handleChartClick}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="day" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
