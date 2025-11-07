@@ -12,6 +12,9 @@ const chartConfig: ChartConfig = {
     label: "Dívidas",
     color: "hsl(var(--chart-1))",
   },
+  day: {
+    label: "Dia",
+  }
 };
 
 export default function DashboardPage() {
@@ -113,7 +116,7 @@ export default function DashboardPage() {
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="day" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
-                   <Tooltip cursor={false} content={<ChartTooltipContent />} />
+                   <Tooltip cursor={false} content={<ChartTooltipContent labelKey="day" />} />
                   <Line type="monotone" dataKey="debts" stroke="var(--color-debts)" strokeWidth={2} dot={false} />
                 </LineChart>
               </ResponsiveContainer>
