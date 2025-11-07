@@ -22,10 +22,10 @@ export default function ProjetosPage() {
   return (
     <>
       <PageHeader title="Gestão de Projetos">
-        <p className="text-sm text-muted-foreground mt-2">
+      </PageHeader>
+      <p className="text-sm text-muted-foreground -mt-4 mb-6">
             Visualize e acesse a rubrica de cada projeto.
         </p>
-      </PageHeader>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => {
           const coordinator = coordinators.find(c => c.id === project.coordinatorId);
