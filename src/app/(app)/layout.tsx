@@ -32,14 +32,9 @@ import {
 
 const navItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/supridor', icon: Users, label: 'Supridor' },
-  { href: '/notificacao', icon: Bell, label: 'Notificação' },
-  { href: '/visaogeral', icon: FileText, label: 'Visão Geral' },
-  { href: '/atuomacao', icon: Cog, label: 'Atuomação' },
-  { href: '/whatsapp', icon: MessageSquare, label: 'Whatsapp' },
-  { href: '/sms', icon: MessageSquare, label: 'SMS' },
-  { href: '/email', icon: Mail, label: 'E-mail' },
-  { href: '/pipeline', icon: Workflow, label: 'Pipeline' },
+  { href: '/coordenadores', icon: Users, label: 'Coordenadores' },
+  { href: '/projetos', icon: Workflow, label: 'Projetos' },
+  { href: '/alertas', icon: Bell, label: 'Alertas' },
   { href: '/matriz', icon: FileJson, label: 'Matriz de decisão' },
 ];
 
@@ -51,17 +46,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-4">
-            <Icons.logo className="h-8 w-auto text-white" />
+            <Icons.logo className="h-8 w-auto text-primary" />
           </div>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} passHref>
+                <Link href={item.href} passHref legacyBehavior>
                   <SidebarMenuButton
+                    as="a"
                     isActive={pathname.startsWith(item.href)}
-                    asChild
                   >
                     <item.icon />
                     <span>{item.label}</span>
