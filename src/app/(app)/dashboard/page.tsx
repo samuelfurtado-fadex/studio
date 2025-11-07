@@ -1,7 +1,7 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { DollarSign, Users, FolderKanban, TrendingUp, TrendingDown } from "lucide-react";
+import { FolderKanban, TrendingUp, TrendingDown, Users, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { PageHeader } from "@/components/page-header";
@@ -19,11 +19,24 @@ export default function DashboardPage() {
   const totalAvailable = 39950.75;
   const totalProjects = 5;
   const totalCoordinators = 5;
+  const overdueDebts = 2;
 
   return (
     <>
       <PageHeader title="Dashboard Gerencial" />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Dívidas Vencidas</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">
+              {overdueDebts}
+            </div>
+            <p className="text-xs text-muted-foreground">Prestações de contas atrasadas</p>
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Saldo Pendente Total</CardTitle>
