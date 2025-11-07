@@ -20,6 +20,10 @@ export type Project = {
   status: 'Ativo' | 'Concluído' | 'Em Pausa';
   openSupplies: number;
   canCreateNewSupply: boolean;
+  budget: {
+    current: number;
+    total: number;
+  };
 };
 
 export type Debt = {
@@ -40,11 +44,11 @@ export const coordinators: Coordinator[] = [
 ];
 
 export const projects: Project[] = [
-  { id: '1', code: 'PROJ-001', name: 'Projeto Alpha', coordinator: 'João da Silva', coordinatorId: '1', budgetHead: 'Pesquisa e Desenvolvimento', status: 'Ativo', openSupplies: 3, canCreateNewSupply: true },
-  { id: '2', code: 'PROJ-002', name: 'Projeto Beta', coordinator: 'Maria Oliveira', coordinatorId: '2', budgetHead: 'Marketing Digital', status: 'Ativo', openSupplies: 1, canCreateNewSupply: true },
-  { id: '3', code: 'PROJ-003', name: 'Projeto Gamma', coordinator: 'Carlos Pereira', coordinatorId: '3', budgetHead: 'Infraestrutura', status: 'Concluído', openSupplies: 0, canCreateNewSupply: false },
-  { id: '4', code: 'PROJ-004', name: 'Projeto Delta', coordinator: 'Ana Souza', coordinatorId: '4', budgetHead: 'Recursos Humanos', status: 'Em Pausa', openSupplies: 2, canCreateNewSupply: false },
-  { id: '5', code: 'PROJ-005', name: 'Projeto Epsilon', coordinator: 'Rafael Santos', coordinatorId: '5', budgetHead: 'Consultoria Externa', status: 'Ativo', openSupplies: 5, canCreateNewSupply: false },
+  { id: '1', code: 'PROJ-001', name: 'Projeto Alpha', coordinator: 'João da Silva', coordinatorId: '1', budgetHead: 'Pesquisa e Desenvolvimento', status: 'Ativo', openSupplies: 3, canCreateNewSupply: true, budget: { current: 74500, total: 100000 } },
+  { id: '2', code: 'PROJ-002', name: 'Projeto Beta', coordinator: 'Maria Oliveira', coordinatorId: '2', budgetHead: 'Marketing Digital', status: 'Ativo', openSupplies: 1, canCreateNewSupply: true, budget: { current: 182500, total: 205000 } },
+  { id: '3', code: 'PROJ-003', name: 'Projeto Gamma', coordinator: 'Carlos Pereira', coordinatorId: '3', budgetHead: 'Infraestrutura', status: 'Concluído', openSupplies: 0, canCreateNewSupply: false, budget: { current: 125000, total: 125000 } },
+  { id: '4', code: 'PROJ-004', name: 'Projeto Delta', coordinator: 'Ana Souza', coordinatorId: '4', budgetHead: 'Recursos Humanos', status: 'Em Pausa', openSupplies: 2, canCreateNewSupply: false, budget: { current: 35000, total: 90000 } },
+  { id: '5', code: 'PROJ-005', name: 'Projeto Epsilon', coordinator: 'Rafael Santos', coordinatorId: '5', budgetHead: 'Consultoria Externa', status: 'Ativo', openSupplies: 5, canCreateNewSupply: false, budget: { current: 15000, total: 50000 } },
 ];
 
 const today = new Date();
