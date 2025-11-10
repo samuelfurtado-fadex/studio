@@ -75,7 +75,7 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                             <CardTitle className="text-sm font-medium">Status</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-lg font-bold">{status}</p>
+                            <p className="text-lg font-bold break-words">{status}</p>
                         </CardContent>
                     </Card>
                     <Card>
