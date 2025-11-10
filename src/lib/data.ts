@@ -54,31 +54,38 @@ export const projects: Project[] = [
 ];
 
 const today = new Date();
-export const debts: Debt[] = [
-  { id: '1', coordinatorName: 'João da Silva', projectName: 'Projeto Alpha', value: 350.00, dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000), status: 'Pendente' },
-  { id: '2', coordinatorName: 'Maria Oliveira', projectName: 'Projeto Beta', value: 120.50, dueDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000), status: 'Pendente' },
-  { id: '3', coordinatorName: 'Carlos Pereira', projectName: 'Projeto Gamma', value: 2500.00, dueDate: new Date(today.getTime() + 25 * 24 * 60 * 60 * 1000), status: 'Pendente' },
-  { id: '4', coordinatorName: 'Rafael Santos', projectName: 'Projeto Epsilon', value: 400.00, dueDate: new Date(today.getTime() - 2 * 24 * 60 * 60 * 1000), status: 'Pendente' },
-  { id: '5', coordinatorName: 'João da Silva', projectName: 'Projeto Alpha', value: 800.00, dueDate: new Date(today.getTime() + 18 * 24 * 60 * 60 * 1000), status: 'Pendente' },
-  { id: '6', coordinatorName: 'Carlos Pereira', projectName: 'Projeto Gamma', value: 1200.00, dueDate: new Date(today.getTime() - 10 * 24 * 60 * 60 * 1000), status: 'Pago' },
-];
+const currentYear = today.getFullYear();
+export const debts: Debt[] = Array.from({ length: 50 }, (_, i) => {
+    const month = Math.floor(i / 4); 
+    const day = (i % 28) + 1;
+    const coordinatorIndex = i % coordinators.length;
+    const projectIndex = i % projects.length;
+    
+    return {
+        id: (i + 1).toString(),
+        coordinatorName: coordinators[coordinatorIndex].name,
+        projectName: projects[projectIndex].name,
+        value: Math.floor(Math.random() * 2000) + 100,
+        dueDate: new Date(currentYear, month, day),
+        status: Math.random() > 0.5 ? 'Pendente' : 'Pago',
+    };
+});
 
-export const monthlyDebtData = [
-  { month: 'Jan', debts: 4000 },
-  { month: 'Fev', debts: 3000 },
-  { month: 'Mar', debts: 5000 },
-  { month: 'Abr', debts: 4500 },
-  { month: 'Mai', debts: 6000 },
-  { month: 'Jun', debts: 5500 },
-  { month: 'Jul', debts: 7000 },
-  { month: 'Ago', debts: 6500 },
-  { month: 'Set', debts: 7500 },
-  { month: 'Out', debts: 8000 },
-  { month: 'Nov', debts: 7200 },
-  { month: 'Dez', debts: 9000 },
-];
+const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-export const dailyDebtData = Array.from({ length: 30 }, (_, i) => ({
-  day: i + 1,
-  debts: Math.floor(Math.random() * 500) + 100,
-}));
+export const monthlyDebtData = monthNames.map((month, index) => {
+  const debtsInMonth = debts.filter(debt => debt.dueDate.getMonth() === index);
+  const total = debtsInMonth.reduce((sum, debt) => sum + debt.value, 0);
+  return { month, debts: total };
+});
+
+export const dailyDebtData = debts.reduce((acc, debt) => {
+    const day = debt.dueDate.getDate();
+    const existingEntry = acc.find(entry => entry.day === day);
+    if (existingEntry) {
+        existingEntry.debts += debt.value;
+    } else {
+        acc.push({ day, debts: debt.value });
+    }
+    return acc;
+}, [] as { day: number, debts: number }[]).sort((a,b) => a.day - b.day);
