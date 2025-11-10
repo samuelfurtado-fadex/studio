@@ -3,7 +3,7 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, useDayPicker, useNavigation } from "react-day-picker"
+import { DayPicker } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -55,48 +55,8 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
-        ),
-        Caption: (captionProps) => {
-          const { goToMonth, nextMonth, previousMonth } = useNavigation();
-          const { numberOfMonths } = useDayPicker();
-          if (props.numberOfMonths && props.numberOfMonths > 1) {
-            return (
-              <>
-                <h2 className="text-sm font-medium">
-                  {captionProps.displayMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-                </h2>
-                <div className="flex items-center gap-1">
-                  <button
-                    disabled={!previousMonth}
-                    onClick={() => previousMonth && goToMonth(previousMonth)}
-                    className={cn(buttonVariants({ variant: "outline" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100")}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    disabled={!nextMonth}
-                    onClick={() => nextMonth && goToMonth(nextMonth)}
-                    className={cn(buttonVariants({ variant: "outline" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100")}
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </>
-            );
-          }
-          return (
-            <div className="flex justify-between w-full">
-              <h2 className="text-sm font-medium">
-                {captionProps.displayMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
-              </h2>
-            </div>
-          );
-        }
+        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+        IconRight: () => <ChevronRight className="h-4 w-4" />,
       }}
       {...props}
     />
@@ -106,3 +66,4 @@ Calendar.displayName = "Calendar"
 
 export { Calendar }
 
+    

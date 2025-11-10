@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -175,7 +176,7 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-1">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
@@ -315,3 +316,5 @@ export default function DashboardPage() {
     </>
   );
 }
+
+    
