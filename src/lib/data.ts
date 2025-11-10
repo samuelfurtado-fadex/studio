@@ -65,9 +65,9 @@ export const debts: Debt[] = Array.from({ length: 50 }, (_, i) => {
         id: (i + 1).toString(),
         coordinatorName: coordinators[coordinatorIndex].name,
         projectName: projects[projectIndex].name,
-        value: Math.floor(Math.random() * 2000) + 100,
+        value: (i * 123.45 % 2000) + 100, // deterministic value
         dueDate: new Date(currentYear, month, day),
-        status: Math.random() > 0.5 ? 'Pendente' : 'Pago',
+        status: (i % 2) === 0 ? 'Pendente' : 'Pago', // deterministic status
     };
 });
 
