@@ -28,6 +28,9 @@ const chartConfig: ChartConfig = {
   },
   day: {
     label: "Dia",
+  },
+  month: {
+    label: "Mês",
   }
 };
 
@@ -117,6 +120,21 @@ export default function DashboardPage() {
       }
     }
   };
+
+  const handleDotClick = (e: any) => {
+    const { payload } = e;
+    const clickedDay = payload.day;
+    const currentMonth = dailyDate?.from?.getMonth() ?? new Date().getMonth();
+    const debtToShow = debts.find(d => {
+        const dueDate = new Date(d.dueDate);
+        return dueDate.getDate() === clickedDay && dueDate.getMonth() === currentMonth;
+    });
+
+    if (debtToShow) {
+        setSelectedDebt(debtToShow);
+        setIsDialogOpen(true);
+    }
+  }
 
 
   return (
@@ -271,12 +289,12 @@ export default function DashboardPage() {
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer>
-                <LineChart data={filteredDailyData} onClick={(data) => handleChartClick(data, 'daily')}>
+                <LineChart data={filteredDailyData}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="day" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
                    <Tooltip cursor={true} content={<ChartTooltipContent labelKey="day" />} />
-                  <Line type="monotone" dataKey="debts" stroke="var(--color-debts)" strokeWidth={2} dot={true} />
+                  <Line type="monotone" dataKey="debts" stroke="var(--color-debts)" strokeWidth={2} dot={{ onClick: handleDotClick, r: 4, style: { cursor: 'pointer' } }} activeDot={{r: 6}} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartContainer>
