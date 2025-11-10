@@ -207,7 +207,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                 </div>
                  <Separator />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status !== 'Aguardando Análise'}>
+                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status === 'Em Aberto'}>
                       {isDownloading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
