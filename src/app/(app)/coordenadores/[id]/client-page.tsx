@@ -247,7 +247,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                                     />
                                     <div>
                                         <label htmlFor="file-upload-error" className="text-sm font-medium text-muted-foreground">Anexar arquivo (opcional)</label>
-                                        <Input id="file-upload-error" type="file" className="mt-1 file:bg-primary file:text-primary-foreground file:hover:bg-primary/90 file:font-semibold file:py-2 file:px-4 file:rounded-md file:border-0 file:mr-4" />
+                                        <Input id="file-upload-error" type="file" className="mt-1 h-auto file:bg-primary file:text-primary-foreground file:hover:bg-primary/90 file:font-semibold file:py-2 file:px-4 file:rounded-md file:border-0 file:mr-4" />
                                     </div>
                                 </div>
                                 <DialogFooter>
@@ -304,3 +304,5 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
     </>
   );
 }
+
+    
