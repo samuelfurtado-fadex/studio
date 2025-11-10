@@ -5,13 +5,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { PageHeader } from "@/components/page-header";
 import { projects, coordinators } from "@/lib/data";
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -38,15 +39,25 @@ export default function ProjetosPage() {
             Visualize e acesse a rubrica de cada projeto.
       </p>
 
-      <div className="mb-6">
-        <Input
-          type="text"
-          placeholder="Buscar por nome do projeto..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
-        />
-      </div>
+      <Card className="mb-8">
+        <CardHeader>
+            <CardTitle>Buscar Projeto</CardTitle>
+            <CardDescription>Filtre os projetos pelo nome para encontrar um específico.</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                type="text"
+                placeholder="Buscar por nome do projeto..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+                />
+            </div>
+        </CardContent>
+      </Card>
+
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredProjects.map((project) => {
