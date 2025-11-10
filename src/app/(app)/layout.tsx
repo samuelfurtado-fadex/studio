@@ -39,7 +39,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2 p-4">
-            <Icons.logo className="h-8 w-auto text-primary" />
+            <Link href="/dashboard">
+              <Icons.logo className="h-8 w-auto text-primary" />
+            </Link>
           </div>
         </SidebarHeader>
         <SidebarContent>
