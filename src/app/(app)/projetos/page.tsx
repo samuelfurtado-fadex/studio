@@ -1,3 +1,7 @@
+
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { PageHeader } from "@/components/page-header";
 import { projects, coordinators } from "@/lib/data";
@@ -7,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { Input } from '@/components/ui/input';
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -19,15 +24,32 @@ const statusConfig: { [key in typeof projects[0]['status']]: { class: string; te
 };
 
 export default function ProjetosPage() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredProjects = projects.filter(project =>
+    project.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       <PageHeader title="Gestão de Projetos">
       </PageHeader>
       <p className="text-sm text-muted-foreground -mt-4 mb-6">
             Visualize e acesse a rubrica de cada projeto.
-        </p>
+      </p>
+
+      <div className="mb-6">
+        <Input
+          type="text"
+          placeholder="Buscar por nome do projeto..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="max-w-sm"
+        />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {projects.map((project) => {
+        {filteredProjects.map((project) => {
           const coordinator = coordinators.find(c => c.id === project.coordinatorId);
           const coordinatorImage = coordinator ? PlaceHolderImages.find(img => img.id === coordinator.avatar) : null;
           const budgetPercentage = (project.budget.current / project.budget.total) * 100;
