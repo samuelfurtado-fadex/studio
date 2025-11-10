@@ -71,6 +71,11 @@ export const monthlyDebtData = [
   { month: 'Mai', debts: 6000 },
   { month: 'Jun', debts: 5500 },
   { month: 'Jul', debts: 7000 },
+  { month: 'Ago', debts: 6500 },
+  { month: 'Set', debts: 7500 },
+  { month: 'Out', debts: 8000 },
+  { month: 'Nov', debts: 7200 },
+  { month: 'Dez', debts: 9000 },
 ];
 
 export const dailyDebtData = Array.from({ length: 30 }, (_, i) => ({
