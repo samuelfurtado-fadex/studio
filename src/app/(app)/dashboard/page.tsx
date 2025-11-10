@@ -89,30 +89,35 @@ export default function DashboardPage() {
     return itemDate >= fromDate && itemDate <= toDate;
   });
 
-  const handleChartClick = (data: any) => {
+  const handleChartClick = (data: any, chartType: 'daily' | 'monthly') => {
     if (data && data.activePayload && data.activePayload.length > 0) {
       const payload = data.activePayload[0].payload;
-      const clickedDay = payload.day;
       
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      let debtToShow: Debt | undefined;
 
-      const debtForDay = debts.find(d => {
-        const dueDate = new Date(d.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
-        
-        // This is a simplification. In a real scenario, you'd match the full date.
-        // Here, we just match the day of the month from the clicked chart item.
-        return dueDate.getDate() === clickedDay && 
-               dueDate.getMonth() === (dailyDate?.from?.getMonth() ?? today.getMonth());
-      });
+      if (chartType === 'daily') {
+        const clickedDay = payload.day;
+        const currentMonth = dailyDate?.from?.getMonth() ?? new Date().getMonth();
+        debtToShow = debts.find(d => {
+          const dueDate = new Date(d.dueDate);
+          return dueDate.getDate() === clickedDay && dueDate.getMonth() === currentMonth;
+        });
+      } else if (chartType === 'monthly') {
+        const clickedMonth = payload.month;
+        const monthIndex = monthMap[clickedMonth];
+        debtToShow = debts.find(d => {
+          const dueDate = new Date(d.dueDate);
+          return dueDate.getMonth() === monthIndex;
+        });
+      }
 
-      if (debtForDay) {
-        setSelectedDebt(debtForDay);
+      if (debtToShow) {
+        setSelectedDebt(debtToShow);
         setIsDialogOpen(true);
       }
     }
   };
+
 
   return (
     <>
@@ -216,7 +221,7 @@ export default function DashboardPage() {
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer>
-                <BarChart data={filteredMonthlyData}>
+                <BarChart data={filteredMonthlyData} onClick={(data) => handleChartClick(data, 'monthly')}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="month" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value / 1000}k`} />
@@ -266,7 +271,7 @@ export default function DashboardPage() {
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer>
-                <LineChart data={filteredDailyData} onClick={handleChartClick}>
+                <LineChart data={filteredDailyData} onClick={(data) => handleChartClick(data, 'daily')}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="day" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
@@ -315,6 +320,5 @@ export default function DashboardPage() {
       )}
     </>
   );
-}
 
     
