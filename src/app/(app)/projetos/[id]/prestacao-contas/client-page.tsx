@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -7,8 +8,9 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, Paperclip, ArrowLeft } from "lucide-react";
+import { Upload, Paperclip, ArrowLeft, Send, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from '@/components/ui/badge';
 
 const formatCurrency = (value: number) => {
     return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -18,14 +20,15 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
     const { toast } = useToast();
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [status, setStatus] = useState("Em Aberto");
+    const [status, setStatus] = useState<'Em Aberto' | 'Aguardando Análise' | 'Concluído'>("Em Aberto");
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
-            setUploadedFile(event.target.files[0]);
+            const file = event.target.files[0];
+            setUploadedFile(file);
             toast({
                 title: "Arquivo selecionado",
-                description: event.target.files[0].name,
+                description: file.name,
             });
         }
     };
@@ -34,12 +37,12 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
         document.getElementById('file-upload')?.click();
     };
 
-    const handleStatusClick = (newStatus: string) => {
+    const handleSubmitForAnalysis = () => {
         if (!uploadedFile) {
             toast({
                 variant: "destructive",
                 title: "Nenhum arquivo anexado",
-                description: "Por favor, anexe um documento antes de alterar o status.",
+                description: "Por favor, anexe um documento antes de enviar para análise.",
             });
             return;
         }
@@ -47,16 +50,42 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
         setIsSubmitting(true);
         // Simulate API call
         setTimeout(() => {
-            setStatus(newStatus);
+            setStatus('Aguardando Análise');
             toast({
-                title: "Status Atualizado",
-                description: `O status da prestação de contas foi alterado para: "${newStatus.replace(/<br \/>/g, ' ')}"`,
+                title: "Documento Enviado para Análise",
+                description: `O status da prestação de contas foi atualizado para "Aguardando Análise".`,
             });
             setIsSubmitting(false);
-        }, 1000);
+        }, 1500);
     };
 
     const daysRemaining = 5; // Mock data
+
+    const getStatusVariant = () => {
+        switch (status) {
+            case 'Em Aberto':
+                return 'destructive';
+            case 'Aguardando Análise':
+                return 'default';
+            case 'Concluído':
+                return 'default';
+            default:
+                return 'secondary';
+        }
+    };
+
+    const getStatusColor = () => {
+        switch (status) {
+            case 'Em Aberto':
+                return 'bg-yellow-500 text-white';
+            case 'Aguardando Análise':
+                return 'bg-blue-500 text-white';
+            case 'Concluído':
+                return 'bg-green-600 text-white';
+            default:
+                return '';
+        }
+    }
 
     return (
         <>
@@ -75,13 +104,9 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                             <CardTitle className="text-sm font-medium">Status</CardTitle>
                         </CardHeader>
                         <CardContent>
-                             <div className="text-lg font-bold break-words">
-                                {status.includes('<br />') ? (
-                                    <div dangerouslySetInnerHTML={{ __html: status }} />
-                                ) : (
-                                    <p>{status}</p>
-                                )}
-                             </div>
+                            <Badge variant={getStatusVariant()} className={getStatusColor()}>
+                                {status}
+                             </Badge>
                         </CardContent>
                     </Card>
                     <Card>
@@ -111,22 +136,16 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                 </div>
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-xl">Você irá ou já foi:</CardTitle>
+                        <CardTitle className="text-xl">Enviar documento para análise</CardTitle>
                     </CardHeader>
                     <CardContent className="flex flex-col md:flex-row items-center gap-4">
-                        <Button 
-                            className="w-full md:w-auto flex-1 h-20 text-lg bg-primary hover:bg-primary/90"
-                            onClick={() => handleStatusClick('Enviada por<br />E-mail')}
-                            disabled={isSubmitting}
-                        >
-                            Foi enviado por e-mail
-                        </Button>
-                        <div className="w-full md:w-auto flex-1 border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center h-20">
+                       
+                        <div className="w-full flex-1 border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center min-h-[10rem]">
                             <div className="flex items-center justify-center w-full">
-                                <Button variant="ghost" size="sm" onClick={triggerFileInput}>
-                                    <Upload className="mr-2 h-4 w-4" /> Adicionar
+                                <Button variant="ghost" size="lg" onClick={triggerFileInput} disabled={status !== 'Em Aberto'}>
+                                    <Upload className="mr-2 h-5 w-5" /> Anexar Documento
                                 </Button>
-                                <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
+                                <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} disabled={status !== 'Em Aberto'} />
                             </div>
                             {uploadedFile && (
                                 <p className="text-sm text-muted-foreground mt-2 flex items-center">
@@ -136,16 +155,17 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                             )}
                              {!uploadedFile && (
                                 <p className="text-xs text-muted-foreground mt-2">
-                                    Anexe o documento da prestação.
+                                    Formatos aceitos: PDF, DOCX, XLSX.
                                 </p>
                             )}
                         </div>
                         <Button 
-                            className="w-full md:w-auto flex-1 h-20 text-lg bg-secondary text-secondary-foreground hover:bg-secondary/90"
-                            onClick={() => handleStatusClick('Entregue na recepção')}
-                            disabled={isSubmitting}
+                            className="w-full md:w-auto flex-1 h-24 text-lg bg-primary hover:bg-primary/90"
+                            onClick={handleSubmitForAnalysis}
+                            disabled={isSubmitting || !uploadedFile || status !== 'Em Aberto'}
                         >
-                            Foi entregue na recepção
+                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-5 w-5" />}
+                            {isSubmitting ? 'Enviando...' : 'Enviar para Análise'}
                         </Button>
                     </CardContent>
                 </Card>

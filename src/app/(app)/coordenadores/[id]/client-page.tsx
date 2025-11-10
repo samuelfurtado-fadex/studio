@@ -87,7 +87,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
     setIsFinalizing(true);
     // Simulate API call
     setTimeout(() => {
-      setStatus('Finalizado');
+      setStatus('Concluído');
       setIsFinalizing(false);
       toast({
         title: "Prestação de Contas Finalizada",
@@ -191,15 +191,15 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                     <Badge 
                       variant={
                         status === 'Em Aberto' ? 'destructive' : 
-                        status === 'Enviada por E-mail' ? 'default' :
-                        status === 'Finalizado' ? 'default' :
+                        status === 'Aguardando Análise' ? 'default' :
+                        status === 'Concluído' ? 'default' :
                         'secondary'
                       }
                       className={
-                        status === 'Em Aberto' ? '' :
-                        status === 'Enviada por E-mail' ? '' :
-                        status === 'Finalizado' ? 'bg-green-600 text-white' :
-                        'bg-blue-600 text-white'
+                        status === 'Em Aberto' ? 'bg-yellow-500 text-white' :
+                        status === 'Aguardando Análise' ? 'bg-blue-500 text-white' :
+                        status === 'Concluído' ? 'bg-green-600 text-white' :
+                        ''
                       }
                     >
                       {status}
@@ -207,7 +207,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                 </div>
                  <Separator />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status === 'Finalizado'}>
+                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status === 'Concluído'}>
                       {isDownloading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
@@ -218,26 +218,26 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                     <div className="flex flex-col gap-2">
                         <Button
                             onClick={handleFinalize}
-                            disabled={isFinalizing || !coordinator.hasDocument || status === 'Finalizado'}
+                            disabled={isFinalizing || !coordinator.hasDocument || status === 'Concluído'}
                             className="bg-green-600 hover:bg-green-700 text-white"
                         >
                             {isFinalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
-                            {isFinalizing ? 'Finalizando...' : 'Finalizar'}
+                            {isFinalizing ? 'Aprovando...' : 'Aprovar e Finalizar'}
                         </Button>
                         <Dialog open={isIncorrectDataOpen} onOpenChange={setIncorrectDataOpen}>
                             <DialogTrigger asChild>
                                 <Button
                                   variant="destructive"
-                                  disabled={!coordinator.hasDocument || status === 'Finalizado'}
+                                  disabled={!coordinator.hasDocument || status === 'Concluído'}
                                 >
-                                  <XCircle className="mr-2 h-4 w-4" /> Dados Incorretos
+                                  <XCircle className="mr-2 h-4 w-4" /> Rejeitar (Dados Incorretos)
                                 </Button>
                             </DialogTrigger>
                              <DialogContent className="sm:max-w-lg">
                                 <DialogHeader>
-                                    <DialogTitle>Apontar Dados Incorretos</DialogTitle>
+                                    <DialogTitle>Rejeitar Prestação de Contas</DialogTitle>
                                     <DialogDescription>
-                                        Descreva o que está incorreto na prestação de contas e anexe um arquivo, se necessário. O coordenador será notificado.
+                                        Descreva o motivo da rejeição. O coordenador será notificado para corrigir e reenviar.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-4 py-4">
@@ -246,7 +246,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                                         rows={5}
                                     />
                                     <div>
-                                        <label htmlFor="file-upload-error" className="text-sm font-medium text-muted-foreground">Anexar arquivo (opcional)</label>
+                                        <label htmlFor="file-upload-error" className="text-sm font-medium text-muted-foreground">Anexar arquivo de referência (opcional)</label>
                                         <Input id="file-upload-error" type="file" className="mt-1 h-auto file:bg-primary file:text-primary-foreground file:hover:bg-primary/90 file:font-semibold file:py-2 file:px-4 file:rounded-md file:border-0 file:mr-4" />
                                     </div>
                                 </div>
