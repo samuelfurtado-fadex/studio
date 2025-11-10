@@ -3,6 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
+import { format } from 'date-fns';
 import { Mail, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,7 +33,7 @@ export const columns: ColumnDef<Debt>[] = [
     header: "Data de Vencimento",
     cell: ({ row }) => {
       const date = row.original.dueDate;
-      return <div>{date.toLocaleDateString('pt-BR')}</div>;
+      return <div>{format(date, 'dd/MM/yyyy')}</div>;
     }
   },
   {
@@ -55,7 +56,7 @@ export const columns: ColumnDef<Debt>[] = [
       if (!coordinator) return null;
 
       const emailSubject = encodeURIComponent(`Notificação de Pendência Financeira: Projeto ${debt.projectName}`);
-      const emailBody = encodeURIComponent(`Prezado(a) ${coordinator.name},\n\nConstatamos uma pendência financeira no valor de ${formatCurrency(debt.value)} referente ao projeto "${debt.projectName}", com vencimento em ${debt.dueDate.toLocaleDateString('pt-BR')}.\n\nPor favor, acesse o sistema para mais detalhes e regularização.\n\nAtenciosamente,\nEquipe Financeira FADEX`);
+      const emailBody = encodeURIComponent(`Prezado(a) ${coordinator.name},\n\nConstatamos uma pendência financeira no valor de ${formatCurrency(debt.value)} referente ao projeto "${debt.projectName}", com vencimento em ${format(debt.dueDate, 'dd/MM/yyyy')}.\n\nPor favor, acesse o sistema para mais detalhes e regularização.\n\nAtenciosamente,\nEquipe Financeira FADEX`);
 
       return (
         <Button variant="ghost" size="sm" asChild>
