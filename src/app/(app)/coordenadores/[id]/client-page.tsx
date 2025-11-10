@@ -207,7 +207,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                 </div>
                  <Separator />
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status === 'Concluído'}>
+                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status !== 'Aguardando Análise'}>
                       {isDownloading ? (
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       ) : (
@@ -218,7 +218,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                     <div className="flex flex-col gap-2">
                         <Button
                             onClick={handleFinalize}
-                            disabled={isFinalizing || !coordinator.hasDocument || status === 'Concluído'}
+                            disabled={isFinalizing || status !== 'Aguardando Análise'}
                             className="bg-green-600 hover:bg-green-700 text-white"
                         >
                             {isFinalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
@@ -228,7 +228,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                             <DialogTrigger asChild>
                                 <Button
                                   variant="destructive"
-                                  disabled={!coordinator.hasDocument || status === 'Concluído'}
+                                  disabled={status !== 'Aguardando Análise'}
                                 >
                                   <XCircle className="mr-2 h-4 w-4" /> Rejeitar (Dados Incorretos)
                                 </Button>
