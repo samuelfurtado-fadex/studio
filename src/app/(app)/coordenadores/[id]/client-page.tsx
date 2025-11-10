@@ -166,7 +166,11 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                         coordinator.prestacaoContasStatus === 'Enviada por E-mail' ? 'default' : 
                         'secondary'
                       }
-                      className="text-white"
+                      className={
+                        coordinator.prestacaoContasStatus === 'Em Aberto' ? 'text-white' :
+                        coordinator.prestacaoContasStatus === 'Enviada por E-mail' ? '' :
+                        'bg-accent text-accent-foreground'
+                      }
                     >
                       {coordinator.prestacaoContasStatus}
                     </Badge>
