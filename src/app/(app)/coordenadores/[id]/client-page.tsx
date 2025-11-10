@@ -140,7 +140,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                     <p className="text-sm text-muted-foreground">Saldo Disponível</p>
                     <p className="text-lg font-bold text-emerald-600">{formatCurrency(coordinator.availableBalance)}</p>
                 </div>
-                 <Button className="w-full" asChild>
+                 <Button className="w-full" asChild variant="secondary">
                     <Link href={`mailto:${coordinator.email}?subject=${emailSubject}&body=${emailBody}`}>
                       <Send className="mr-2 h-4 w-4" /> Enviar Notificação por E-mail
                     </Link>

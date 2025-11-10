@@ -3,7 +3,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { Mail, Send } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { Debt } from "@/lib/data";
@@ -59,8 +59,8 @@ export const columns: ColumnDef<Debt>[] = [
 
       return (
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`mailto:${coordinator.email}?subject=${emailSubject}&body=${emailBody}`}>
-            <Mail className="mr-2 h-4 w-4" />
+          <Link href={`mailto:${coordinator.email}?subject=${emailSubject}&body=${emailBody}`} className="flex items-center gap-2">
+            <Send className="h-4 w-4" />
             Notificar por E-mail
           </Link>
         </Button>
