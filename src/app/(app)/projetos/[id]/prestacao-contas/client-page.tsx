@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, RefreshCw, Paperclip, ArrowLeft } from "lucide-react";
+import { Upload, Paperclip, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const formatCurrency = (value: number) => {
@@ -105,12 +105,9 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                             Foi enviado por e-mail
                         </Button>
                         <div className="w-full md:w-auto flex-1 border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center text-center h-20">
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center justify-center w-full">
                                 <Button variant="ghost" size="sm" onClick={triggerFileInput}>
                                     <Upload className="mr-2 h-4 w-4" /> Adicionar
-                                </Button>
-                                <Button variant="ghost" size="sm" onClick={triggerFileInput}>
-                                    <RefreshCw className="mr-2 h-4 w-4" /> Substituir
                                 </Button>
                                 <Input id="file-upload" type="file" className="hidden" onChange={handleFileChange} />
                             </div>
