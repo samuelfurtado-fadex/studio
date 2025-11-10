@@ -18,6 +18,7 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
     const { toast } = useToast();
     const [uploadedFile, setUploadedFile] = useState<File | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [status, setStatus] = useState("Em Aberto");
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         if (event.target.files && event.target.files[0]) {
@@ -33,13 +34,14 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
         document.getElementById('file-upload')?.click();
     };
 
-    const handleStatusClick = (status: string) => {
+    const handleStatusClick = (newStatus: string) => {
         setIsSubmitting(true);
         // Simulate API call
         setTimeout(() => {
+            setStatus(newStatus);
             toast({
                 title: "Status Atualizado",
-                description: `O status da prestação de contas foi alterado para: "${status}"`,
+                description: `O status da prestação de contas foi alterado para: "${newStatus}"`,
             });
             setIsSubmitting(false);
         }, 1000);
@@ -64,7 +66,7 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                             <CardTitle className="text-sm font-medium">Status</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-lg font-bold">Em Aberto</p>
+                            <p className="text-lg font-bold">{status}</p>
                         </CardContent>
                     </Card>
                     <Card>
@@ -99,7 +101,7 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                     <CardContent className="flex flex-col md:flex-row items-center gap-4">
                         <Button 
                             className="w-full md:w-auto flex-1 h-20 text-lg bg-primary hover:bg-primary/90"
-                            onClick={() => handleStatusClick('Enviado por e-mail')}
+                            onClick={() => handleStatusClick('Enviada por E-mail')}
                             disabled={isSubmitting}
                         >
                             Foi enviado por e-mail
