@@ -4,7 +4,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Phone, Mail, User, Briefcase, DollarSign, History, Send, FileText, Download, Loader2 } from "lucide-react";
+import { Phone, Mail, User, Briefcase, DollarSign, History, Send, FileText, Download, Loader2, Upload, CheckCircle, XCircle } from "lucide-react";
 
 import type { Coordinator } from "@/lib/data";
 import { projects, debts } from "@/lib/data";
@@ -21,9 +21,12 @@ import {
   DialogTitle,
   DialogDescription,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -39,6 +42,9 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 export default function CoordinatorProfileClientPage({ coordinator }: { coordinator: Coordinator }) {
   const { toast } = useToast();
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isFinalizing, setIsFinalizing] = useState(false);
+  const [status, setStatus] = useState(coordinator.prestacaoContasStatus);
+  const [isIncorrectDataOpen, setIncorrectDataOpen] = useState(false);
 
   const coordinatorProjects = projects.filter(p => p.coordinatorId === coordinator.id);
   const coordinatorDebts = debts.filter(d => d.coordinatorName === coordinator.name);
@@ -76,6 +82,28 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
       });
     }, 2000);
   };
+  
+  const handleFinalize = () => {
+    setIsFinalizing(true);
+    // Simulate API call
+    setTimeout(() => {
+      setStatus('Finalizado');
+      setIsFinalizing(false);
+      toast({
+        title: "Prestação de Contas Finalizada",
+        description: "A prestação de contas foi validada e concluída com sucesso.",
+      });
+    }, 1500);
+  };
+
+  const handleIncorrectDataSubmit = () => {
+    // Here you would handle the submission of the form data
+    setIncorrectDataOpen(false);
+    toast({
+        title: "Notificação Enviada",
+        description: "O coordenador foi notificado sobre os dados incorretos."
+    });
+  }
 
 
   return (
@@ -162,28 +190,74 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                     <span className="text-sm text-muted-foreground">Status</span>
                     <Badge 
                       variant={
-                        coordinator.prestacaoContasStatus === 'Em Aberto' ? 'destructive' : 
-                        coordinator.prestacaoContasStatus === 'Enviada por E-mail' ? 'default' : 
+                        status === 'Em Aberto' ? 'destructive' : 
+                        status === 'Enviada por E-mail' ? 'default' :
+                        status === 'Finalizado' ? 'default' :
                         'secondary'
                       }
                       className={
-                        coordinator.prestacaoContasStatus === 'Em Aberto' ? 'text-white' :
-                        coordinator.prestacaoContasStatus === 'Enviada por E-mail' ? '' :
+                        status === 'Em Aberto' ? '' :
+                        status === 'Enviada por E-mail' ? '' :
+                        status === 'Finalizado' ? 'bg-green-600 text-white' :
                         'bg-accent text-accent-foreground'
                       }
                     >
-                      {coordinator.prestacaoContasStatus}
+                      {status}
                     </Badge>
                 </div>
                  <Separator />
-                <Button className="w-full" onClick={handleDownload} disabled={isDownloading}>
-                  {isDownloading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Download className="mr-2 h-4 w-4" />
-                  )}
-                  {isDownloading ? 'Baixando...' : 'Baixar Documento'}
-                </Button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Button variant="outline" onClick={handleDownload} disabled={isDownloading || status === 'Finalizado'}>
+                      {isDownloading ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="mr-2 h-4 w-4" />
+                      )}
+                      {isDownloading ? 'Baixando...' : 'Baixar Documento'}
+                    </Button>
+                    <div className="flex flex-col gap-2">
+                        <Button
+                            onClick={handleFinalize}
+                            disabled={isFinalizing || !coordinator.hasDocument || status === 'Finalizado'}
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                            {isFinalizing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <CheckCircle className="mr-2 h-4 w-4" />}
+                            {isFinalizing ? 'Finalizando...' : 'Finalizar'}
+                        </Button>
+                        <Dialog open={isIncorrectDataOpen} onOpenChange={setIncorrectDataOpen}>
+                            <DialogTrigger asChild>
+                                <Button
+                                  variant="destructive"
+                                  disabled={!coordinator.hasDocument || status === 'Finalizado'}
+                                >
+                                  <XCircle className="mr-2 h-4 w-4" /> Dados Incorretos
+                                </Button>
+                            </DialogTrigger>
+                             <DialogContent className="sm:max-w-lg">
+                                <DialogHeader>
+                                    <DialogTitle>Apontar Dados Incorretos</DialogTitle>
+                                    <DialogDescription>
+                                        Descreva o que está incorreto na prestação de contas e anexe um arquivo, se necessário. O coordenador será notificado.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                    <Textarea
+                                        placeholder="Detalhe aqui os erros encontrados..."
+                                        rows={5}
+                                    />
+                                    <div>
+                                        <label htmlFor="file-upload-error" className="text-sm font-medium text-muted-foreground">Anexar arquivo (opcional)</label>
+                                        <Input id="file-upload-error" type="file" className="mt-1" />
+                                    </div>
+                                </div>
+                                <DialogFooter>
+                                    <Button type="button" variant="ghost" onClick={() => setIncorrectDataOpen(false)}>Cancelar</Button>
+                                    <Button type="submit" onClick={handleIncorrectDataSubmit}>Enviar Notificação</Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+                </div>
             </CardContent>
           </Card>
           <Card>
