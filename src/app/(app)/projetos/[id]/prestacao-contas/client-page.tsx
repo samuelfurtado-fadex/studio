@@ -35,6 +35,15 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
     };
 
     const handleStatusClick = (newStatus: string) => {
+        if (!uploadedFile) {
+            toast({
+                variant: "destructive",
+                title: "Nenhum arquivo anexado",
+                description: "Por favor, anexe um documento antes de alterar o status.",
+            });
+            return;
+        }
+
         setIsSubmitting(true);
         // Simulate API call
         setTimeout(() => {
