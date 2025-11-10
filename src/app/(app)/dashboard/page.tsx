@@ -175,8 +175,8 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
+      <div className="mt-6 grid grid-cols-1 gap-6">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
             <Popover>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
             </ChartContainer>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-3">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Acompanhamento de Dívidas (Diário)</CardTitle>
             <Popover>
