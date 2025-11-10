@@ -3,7 +3,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Phone, Mail, User, Briefcase, DollarSign, History, Send } from "lucide-react";
+import { useState } from "react";
+import { Phone, Mail, User, Briefcase, DollarSign, History, Send, FileText, Download, Loader2 } from "lucide-react";
 
 import type { Coordinator } from "@/lib/data";
 import { projects, debts } from "@/lib/data";
@@ -21,6 +22,8 @@ import {
   DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -34,7 +37,9 @@ const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
 export default function CoordinatorProfileClientPage({ coordinator }: { coordinator: Coordinator }) {
-  
+  const { toast } = useToast();
+  const [isDownloading, setIsDownloading] = useState(false);
+
   const coordinatorProjects = projects.filter(p => p.coordinatorId === coordinator.id);
   const coordinatorDebts = debts.filter(d => d.coordinatorName === coordinator.name);
   const avatarImage = PlaceHolderImages.find(img => img.id === coordinator.avatar);
@@ -43,6 +48,34 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
   const emailSubject = encodeURIComponent(`Notificação de Pendência Financeira`);
   const emailBody = encodeURIComponent(`Prezado(a) ${coordinator.name},\n\nConstatamos que há pendências financeiras associadas ao seu perfil em nossa plataforma. \n\nPor favor, acesse o sistema para mais detalhes e regularização.\n\nAtenciosamente,\nEquipe Financeira FADEX`);
   const phoneNumber = coordinator.phone.replace(/\D/g, '');
+  
+  const handleDownload = () => {
+    if (!coordinator.hasDocument) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao baixar",
+        description: "Nenhum documento anexado por este coordenador.",
+      });
+      return;
+    }
+
+    setIsDownloading(true);
+    toast({
+      title: "Download iniciado",
+      description: "O documento da prestação de contas está sendo baixado.",
+    });
+
+    // Simulate download process
+    setTimeout(() => {
+      setIsDownloading(false);
+      // In a real app, this would trigger a file download.
+      // For this mock, we'll just show a success message.
+       toast({
+        title: "Download Concluído",
+        description: "Documento baixado com sucesso.",
+      });
+    }, 2000);
+  };
 
 
   return (
@@ -120,6 +153,35 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
         </div>
 
         <div className="lg:col-span-2 space-y-6">
+           <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5" /> Prestação de Contas</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <Badge 
+                      variant={
+                        coordinator.prestacaoContasStatus === 'Em Aberto' ? 'destructive' : 
+                        coordinator.prestacaoContasStatus === 'Enviada por E-mail' ? 'default' : 
+                        'secondary'
+                      }
+                      className="text-white"
+                    >
+                      {coordinator.prestacaoContasStatus}
+                    </Badge>
+                </div>
+                 <Separator />
+                <Button className="w-full" onClick={handleDownload} disabled={isDownloading}>
+                  {isDownloading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  {isDownloading ? 'Baixando...' : 'Baixar Documento'}
+                </Button>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2"><Briefcase className="w-5 h-5"/> Projetos</CardTitle>

@@ -8,6 +8,8 @@ export type Coordinator = {
   phone: string;
   cpf: string;
   avatar: string;
+  prestacaoContasStatus: 'Em Aberto' | 'Enviada por E-mail' | 'Entregue na recepção';
+  hasDocument: boolean;
 };
 
 export type Project = {
@@ -36,11 +38,11 @@ export type Debt = {
 };
 
 export const coordinators: Coordinator[] = [
-  { id: '1', name: 'João da Silva', project: 'Projeto Alpha', pendingBalance: 1500.00, availableBalance: 8500.00, email: 'joao.silva@example.com', phone: '(11) 98765-4321', cpf: '123.456.789-00', avatar: 'user-1' },
-  { id: '2', name: 'Maria Oliveira', project: 'Projeto Beta', pendingBalance: 250.50, availableBalance: 4750.50, email: 'maria.oliveira@example.com', phone: '(21) 91234-5678', cpf: '234.567.890-11', avatar: 'user-2' },
-  { id: '3', name: 'Carlos Pereira', project: 'Projeto Gamma', pendingBalance: 5300.75, availableBalance: 14700.25, email: 'carlos.pereira@example.com', phone: '(31) 95678-1234', cpf: '345.678.901-22', avatar: 'user-3' },
-  { id: '4', name: 'Ana Souza', project: 'Projeto Delta', pendingBalance: 0.00, availableBalance: 12000.00, email: 'ana.souza@example.com', phone: '(41) 98765-1234', cpf: '456.789.012-33', avatar: 'user-4' },
-  { id: '5', name: 'Rafael Santos', project: 'Projeto Epsilon', pendingBalance: 800.00, availableBalance: 2200.00, email: 'rafael.santos@example.com', phone: '(51) 91234-8765', cpf: '567.890.123-44', avatar: 'user-5' },
+  { id: '1', name: 'João da Silva', project: 'Projeto Alpha', pendingBalance: 1500.00, availableBalance: 8500.00, email: 'joao.silva@example.com', phone: '(11) 98765-4321', cpf: '123.456.789-00', avatar: 'user-1', prestacaoContasStatus: 'Enviada por E-mail', hasDocument: true },
+  { id: '2', name: 'Maria Oliveira', project: 'Projeto Beta', pendingBalance: 250.50, availableBalance: 4750.50, email: 'maria.oliveira@example.com', phone: '(21) 91234-5678', cpf: '234.567.890-11', avatar: 'user-2', prestacaoContasStatus: 'Entregue na recepção', hasDocument: true },
+  { id: '3', name: 'Carlos Pereira', project: 'Projeto Gamma', pendingBalance: 5300.75, availableBalance: 14700.25, email: 'carlos.pereira@example.com', phone: '(31) 95678-1234', cpf: '345.678.901-22', avatar: 'user-3', prestacaoContasStatus: 'Em Aberto', hasDocument: false },
+  { id: '4', name: 'Ana Souza', project: 'Projeto Delta', pendingBalance: 0.00, availableBalance: 12000.00, email: 'ana.souza@example.com', phone: '(41) 98765-1234', cpf: '456.789.012-33', avatar: 'user-4', prestacaoContasStatus: 'Em Aberto', hasDocument: false },
+  { id: '5', name: 'Rafael Santos', project: 'Projeto Epsilon', pendingBalance: 800.00, availableBalance: 2200.00, email: 'rafael.santos@example.com', phone: '(51) 91234-8765', cpf: '567.890.123-44', avatar: 'user-5', prestacaoContasStatus: 'Enviada por E-mail', hasDocument: true },
 ];
 
 export const projects: Project[] = [
