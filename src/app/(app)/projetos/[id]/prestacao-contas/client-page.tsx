@@ -50,7 +50,7 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
             setStatus(newStatus);
             toast({
                 title: "Status Atualizado",
-                description: `O status da prestação de contas foi alterado para: "${newStatus}"`,
+                description: `O status da prestação de contas foi alterado para: "${newStatus.replace(/<br \/>/g, ' ')}"`,
             });
             setIsSubmitting(false);
         }, 1000);
@@ -75,7 +75,13 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                             <CardTitle className="text-sm font-medium">Status</CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <p className="text-lg font-bold break-words">{status}</p>
+                             <div className="text-lg font-bold break-words">
+                                {status.includes('<br />') ? (
+                                    <div dangerouslySetInnerHTML={{ __html: status }} />
+                                ) : (
+                                    <p>{status}</p>
+                                )}
+                             </div>
                         </CardContent>
                     </Card>
                     <Card>
@@ -110,7 +116,7 @@ export default function PrestacaoContasClientPage({ project }: { project: Projec
                     <CardContent className="flex flex-col md:flex-row items-center gap-4">
                         <Button 
                             className="w-full md:w-auto flex-1 h-20 text-lg bg-primary hover:bg-primary/90"
-                            onClick={() => handleStatusClick('Enviada por E-mail')}
+                            onClick={() => handleStatusClick('Enviada por<br />E-mail')}
                             disabled={isSubmitting}
                         >
                             Foi enviado por e-mail
