@@ -1,3 +1,4 @@
+
 export type Coordinator = {
   id: string;
   name: string;
@@ -57,7 +58,7 @@ const today = new Date();
 const currentYear = today.getFullYear();
 export const debts: Debt[] = Array.from({ length: 50 }, (_, i) => {
     const month = Math.floor(i / 4); 
-    const day = (i % 28) + 1;
+    const day = (i % 31) + 1;
     const coordinatorIndex = i % coordinators.length;
     const projectIndex = i % projects.length;
     
