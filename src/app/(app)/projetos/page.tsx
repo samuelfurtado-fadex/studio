@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { Pagination, PaginationContent, PaginationItem, PaginationPrevious, PaginationNext, PaginationLink, PaginationEllipsis } from '@/components/ui/pagination';
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -24,12 +25,80 @@ const statusConfig: { [key in typeof projects[0]['status']]: { class: string; te
   'Em Pausa': { class: 'bg-yellow-500', text: 'Em Pausa' },
 };
 
+const ITEMS_PER_PAGE = 6;
+
 export default function ProjetosPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredProjects = projects.filter(project =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredProjects.length / ITEMS_PER_PAGE);
+  const paginatedProjects = filteredProjects.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  );
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    let endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    if (endPage - startPage + 1 < maxPagesToShow) {
+        startPage = Math.max(1, endPage - maxPagesToShow + 1);
+    }
+    
+    if (startPage > 1) {
+        pageNumbers.push(
+            <PaginationItem key="start-ellipsis">
+                <PaginationEllipsis />
+            </PaginationItem>
+        );
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(
+            <PaginationItem key={i}>
+                <PaginationLink href="#" isActive={i === currentPage} onClick={(e) => { e.preventDefault(); handlePageChange(i);}}>
+                    {i}
+                </PaginationLink>
+            </PaginationItem>
+        );
+    }
+
+    if (endPage < totalPages) {
+        pageNumbers.push(
+            <PaginationItem key="end-ellipsis">
+                <PaginationEllipsis />
+            </PaginationItem>
+        );
+    }
+
+
+    return (
+        <Pagination>
+            <PaginationContent>
+                <PaginationItem>
+                    <PaginationPrevious href="#" onClick={(e) => { e.preventDefault(); handlePageChange(Math.max(1, currentPage - 1)); }} />
+                </PaginationItem>
+                {pageNumbers}
+                <PaginationItem>
+                    <PaginationNext href="#" onClick={(e) => { e.preventDefault(); handlePageChange(Math.min(totalPages, currentPage + 1)); }} />
+                </PaginationItem>
+            </PaginationContent>
+        </Pagination>
+    );
+}
+
 
   return (
     <>
@@ -51,7 +120,7 @@ export default function ProjetosPage() {
                 type="text"
                 placeholder="Buscar por nome do projeto..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 className="pl-10"
                 />
             </div>
@@ -60,7 +129,7 @@ export default function ProjetosPage() {
 
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {filteredProjects.map((project) => {
+        {paginatedProjects.map((project) => {
           const coordinator = coordinators.find(c => c.id === project.coordinatorId);
           const coordinatorImage = coordinator ? PlaceHolderImages.find(img => img.id === coordinator.avatar) : null;
           const budgetPercentage = (project.budget.current / project.budget.total) * 100;
@@ -105,6 +174,9 @@ export default function ProjetosPage() {
             </Card>
           );
         })}
+      </div>
+      <div className="mt-8">
+        {renderPagination()}
       </div>
     </>
   );
