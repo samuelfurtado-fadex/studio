@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
-import { addDays, format, startOfMonth } from "date-fns";
+import { addDays, format, startOfMonth, differenceInDays } from "date-fns";
 
 const chartConfig: ChartConfig = {
   debts: {
@@ -57,6 +57,16 @@ export default function DashboardPage() {
     from: new Date(),
     to: addDays(new Date(), 30),
   });
+
+  const handleDailyDateSelect = (range: DateRange | undefined) => {
+    if (range?.from && range?.to) {
+      if (differenceInDays(range.to, range.from) > 30) {
+        // Do nothing or show a toast message
+        return;
+      }
+    }
+    setDailyDate(range);
+  };
 
   const [monthlyDate, setMonthlyDate] = useState<DateRange | undefined>({
     from: new Date(new Date().getFullYear(), 0, 1),
@@ -280,8 +290,8 @@ export default function DashboardPage() {
                   mode="range"
                   defaultMonth={dailyDate?.from}
                   selected={dailyDate}
-                  onSelect={setDailyDate}
-                  numberOfMonths={2}
+                  onSelect={handleDailyDateSelect}
+                  numberOfMonths={1}
                 />
               </PopoverContent>
             </Popover>
@@ -340,3 +350,4 @@ export default function DashboardPage() {
   );
 
     
+  
