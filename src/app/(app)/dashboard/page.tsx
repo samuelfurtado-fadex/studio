@@ -60,7 +60,7 @@ export default function DashboardPage() {
 
   const handleDailyDateSelect = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
-      if (differenceInDays(range.to, range.from) > 30) {
+      if (differenceInDays(range.to, range.from) > 31) {
         // Do nothing or show a toast message
         return;
       }
@@ -299,7 +299,7 @@ export default function DashboardPage() {
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
               <ResponsiveContainer>
-                <LineChart data={filteredDailyData}>
+                <LineChart data={filteredDailyData} onClick={(data) => handleChartClick(data, 'daily')}>
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="day" tickLine={false} tickMargin={10} axisLine={false} />
                   <YAxis tickLine={false} axisLine={false} tickFormatter={(value) => `R$${value}`} />
@@ -336,7 +336,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Vencimento:</span>
-                <span className="font-medium">{selectedDebt.dueDate.toLocaleDateString('pt-BR')}</span>
+                <span className="font-medium">{format(selectedDebt.dueDate, 'dd/MM/yyyy')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status:</span>
@@ -351,4 +351,6 @@ export default function DashboardPage() {
 
     
   
+    
+
     
