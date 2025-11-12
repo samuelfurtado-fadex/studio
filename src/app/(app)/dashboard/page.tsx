@@ -259,18 +259,17 @@ export default function DashboardPage() {
 
     const debtToShow = debts.find(d => {
         const dueDate = new Date(d.dueDate);
-        dueDate.setHours(0, 0, 0, 0);
         
         const from = new Date(dailyDate.from!);
-        from.setHours(0, 0, 0, 0);
-
         const to = dailyDate.to ? new Date(dailyDate.to) : new Date(from);
+
+        from.setHours(0, 0, 0, 0);
         to.setHours(23, 59, 59, 999);
-        
+
         if (dueDate >= from && dueDate <= to) {
-            const itemDate = new Date(from.getFullYear(), from.getMonth(), clickedDay);
-            itemDate.setHours(0, 0, 0, 0);
-            return dueDate.getDate() === clickedDay && dueDate.getMonth() === itemDate.getMonth() && dueDate.getFullYear() === itemDate.getFullYear();
+            return dueDate.getDate() === clickedDay && 
+                   dueDate.getMonth() === from.getMonth() && 
+                   dueDate.getFullYear() === from.getFullYear();
         }
         return false;
     });
@@ -282,7 +281,7 @@ export default function DashboardPage() {
   }
 
   const QuickFilter = ({ options, activeFilter, onFilterChange, chartType, isOpen, onOpenChange }: { options: {label: string, value: string}[], activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, chartType: 'daily' | 'monthly', isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) => (
-    <div className="flex flex-wrap items-center gap-2 mb-4 mt-4">
+    <div className="flex flex-wrap items-center gap-2">
         {options.map(opt => (
             <Button
                 key={opt.value}
@@ -308,7 +307,6 @@ export default function DashboardPage() {
             <PopoverContent className="w-auto p-0" align="end">
                 <Calendar
                     locale={ptBR}
-                    initialFocus
                     mode="range"
                     selected={chartType === 'daily' ? dailyDate : monthlyDate}
                     onSelect={chartType === 'daily' ? handleDailyDateSelect : handleMonthlyDateSelect}
@@ -393,28 +391,30 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
               <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
-               <QuickFilter 
-                  options={monthlyFilterOptions}
-                  activeFilter={monthlyActiveFilter} 
-                  onFilterChange={handleFilterChange}
-                  chartType="monthly"
-                  isOpen={isMonthlyCalendarOpen}
-                  onOpenChange={setMonthlyCalendarOpen}
-              />
-               <p className="text-sm text-muted-foreground">
-                    {monthlyDate?.from ? (
-                      monthlyDate.to ? (
-                        <>
-                          {format(monthlyDate.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                          {format(monthlyDate.to, "dd/MM/yyyy", { locale: ptBR })}
-                        </>
+               <div className="mt-4">
+                <QuickFilter 
+                    options={monthlyFilterOptions}
+                    activeFilter={monthlyActiveFilter} 
+                    onFilterChange={handleFilterChange}
+                    chartType="monthly"
+                    isOpen={isMonthlyCalendarOpen}
+                    onOpenChange={setMonthlyCalendarOpen}
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                      {monthlyDate?.from ? (
+                        monthlyDate.to ? (
+                          <>
+                            {format(monthlyDate.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                            {format(monthlyDate.to, "dd/MM/yyyy", { locale: ptBR })}
+                          </>
+                        ) : (
+                          format(monthlyDate.from, "dd/MM/yyyy", { locale: ptBR })
+                        )
                       ) : (
-                        format(monthlyDate.from, "dd/MM/yyyy", { locale: ptBR })
-                      )
-                    ) : (
-                      <span>Período não selecionado</span>
-                    )}
-                </p>
+                        <span>Período não selecionado</span>
+                      )}
+                  </p>
+              </div>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -433,28 +433,30 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Acompanhamento de Dívidas (Diário)</CardTitle>
-              <QuickFilter 
-                  options={dailyFilterOptions}
-                  activeFilter={dailyActiveFilter}
-                  onFilterChange={handleFilterChange}
-                  chartType="daily"
-                  isOpen={isDailyCalendarOpen}
-                  onOpenChange={setDailyCalendarOpen}
-              />
-               <p className="text-sm text-muted-foreground">
-                    {dailyDate?.from ? (
-                      dailyDate.to ? (
-                        <>
-                          {format(dailyDate.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
-                          {format(dailyDate.to, "dd/MM/yyyy", { locale: ptBR })}
-                        </>
+              <div className="mt-4">
+                <QuickFilter 
+                    options={dailyFilterOptions}
+                    activeFilter={dailyActiveFilter}
+                    onFilterChange={handleFilterChange}
+                    chartType="daily"
+                    isOpen={isDailyCalendarOpen}
+                    onOpenChange={setDailyCalendarOpen}
+                />
+                <p className="text-sm text-muted-foreground mt-2">
+                      {dailyDate?.from ? (
+                        dailyDate.to ? (
+                          <>
+                            {format(dailyDate.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                            {format(dailyDate.to, "dd/MM/yyyy", { locale: ptBR })}
+                          </>
+                        ) : (
+                          format(dailyDate.from, "dd/MM/yyyy", { locale: ptBR })
+                        )
                       ) : (
-                        format(dailyDate.from, "dd/MM/yyyy", { locale: ptBR })
-                      )
-                    ) : (
-                      <span>Período não selecionado</span>
-                    )}
-                </p>
+                        <span>Período não selecionado</span>
+                      )}
+                  </p>
+              </div>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -511,6 +513,8 @@ export default function DashboardPage() {
 
     
   
+    
+
     
 
     
