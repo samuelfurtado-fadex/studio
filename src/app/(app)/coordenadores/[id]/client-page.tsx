@@ -29,10 +29,19 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const formatCurrency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 };
+
+const rejectionReasons = [
+    { id: 'inconsistent-doc', label: 'Documento inconsistente' },
+    { id: 'incorrect-value', label: 'Valor incorreto' },
+    { id: 'missing-proof', label: 'Falta de comprovante' },
+    { id: 'other', label: 'Outro (descrever abaixo)' },
+];
 
 export default function CoordinatorProfileClientPage({ coordinator }: { coordinator: Coordinator }) {
   const { toast } = useToast();
@@ -208,13 +217,24 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                                 <DialogHeader>
                                     <DialogTitle>Rejeitar Prestação de Contas</DialogTitle>
                                     <DialogDescription>
-                                        Descreva o motivo da rejeição. O coordenador será notificado para corrigir e reenviar.
+                                        Selecione os motivos da rejeição. O coordenador será notificado para corrigir e reenviar.
                                     </DialogDescription>
                                 </DialogHeader>
                                 <div className="space-y-4 py-4">
+                                     <div className="space-y-2">
+                                        <p className="text-sm font-medium">Motivos de Rejeição</p>
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                                            {rejectionReasons.map(reason => (
+                                                <div key={reason.id} className="flex items-center space-x-2">
+                                                    <Checkbox id={reason.id} />
+                                                    <Label htmlFor={reason.id} className="text-sm font-normal">{reason.label}</Label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                     <Textarea
-                                        placeholder="Detalhe aqui os erros encontrados..."
-                                        rows={5}
+                                        placeholder="Detalhe aqui os erros encontrados (opcional)..."
+                                        rows={4}
                                     />
                                     <div>
                                         <label htmlFor="file-upload-error" className="text-sm font-medium text-muted-foreground">Anexar arquivo de referência (opcional)</label>
@@ -275,3 +295,5 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
     </>
   );
 }
+
+    
