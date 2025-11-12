@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,28 +9,36 @@ import { columns } from "@/components/data-table/columns-alertas";
 import { debts, type Debt } from "@/lib/data";
 
 export default function AlertasClientPage() {
-  const [debts7days, setDebts7days] = useState<Debt[]>([]);
-  const [debts15days, setDebts15days] = useState<Debt[]>([]);
-  const [debts30days, setDebts30days] = useState<Debt[]>([]);
+  const [debts1_10, setDebts1_10] = useState<Debt[]>([]);
+  const [debts11_20, setDebts11_20] = useState<Debt[]>([]);
+  const [debts21_30, setDebts21_30] = useState<Debt[]>([]);
+  const [debts31_40, setDebts31_40] = useState<Debt[]>([]);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
     
     const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    const sevenDaysFromNow = new Date(now);
-    sevenDaysFromNow.setDate(now.getDate() + 7);
+    const filterDebtsByRange = (startDay: number, endDay: number) => {
+      const startDate = new Date(today);
+      startDate.setDate(today.getDate() + startDay);
+      
+      const endDate = new Date(today);
+      endDate.setDate(today.getDate() + endDay);
 
-    const fifteenDaysFromNow = new Date(now);
-    fifteenDaysFromNow.setDate(now.getDate() + 15);
-    
-    const thirtyDaysFromNow = new Date(now);
-    thirtyDaysFromNow.setDate(now.getDate() + 30);
+      return debts.filter(d => {
+        const dueDate = new Date(d.dueDate);
+        return dueDate >= startDate && dueDate <= endDate && d.status === 'Pendente';
+      });
+    };
 
-    setDebts7days(debts.filter(d => d.dueDate <= sevenDaysFromNow && d.dueDate >= now && d.status === 'Pendente'));
-    setDebts15days(debts.filter(d => d.dueDate <= fifteenDaysFromNow && d.dueDate >= now && d.status === 'Pendente'));
-    setDebts30days(debts.filter(d => d.dueDate <= thirtyDaysFromNow && d.dueDate >= now && d.status === 'Pendente'));
+    setDebts1_10(filterDebtsByRange(1, 10));
+    setDebts11_20(filterDebtsByRange(11, 20));
+    setDebts21_30(filterDebtsByRange(21, 30));
+    setDebts31_40(filterDebtsByRange(31, 40));
+
   }, []);
 
   if (!isClient) {
@@ -37,11 +46,12 @@ export default function AlertasClientPage() {
     return (
         <>
             <PageHeader title="Alertas de Vencimento" />
-            <Tabs defaultValue="7dias">
-                <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
-                <TabsTrigger value="7dias">Até 7 dias</TabsTrigger>
-                <TabsTrigger value="15dias">Até 15 dias</TabsTrigger>
-                <TabsTrigger value="30dias">Até 30 dias</TabsTrigger>
+            <Tabs defaultValue="1-10dias">
+                <TabsList className="grid w-full max-w-xl grid-cols-4 mb-4">
+                  <TabsTrigger value="1-10dias">1 À 10 DIAS</TabsTrigger>
+                  <TabsTrigger value="11-20dias">DE 11 À 20 DIAS</TabsTrigger>
+                  <TabsTrigger value="21-30dias">DE 21 À 30 DIAS</TabsTrigger>
+                  <TabsTrigger value="31-40dias">DE 31 À 40 DIAS</TabsTrigger>
                 </TabsList>
                 <div className="p-4 sm:p-6 bg-card rounded-lg shadow-sm">
                     <p>Carregando...</p>
@@ -54,21 +64,25 @@ export default function AlertasClientPage() {
   return (
     <>
       <PageHeader title="Alertas de Vencimento" />
-      <Tabs defaultValue="7dias">
-        <TabsList className="grid w-full max-w-md grid-cols-3 mb-4">
-          <TabsTrigger value="7dias">Até 7 dias</TabsTrigger>
-          <TabsTrigger value="15dias">Até 15 dias</TabsTrigger>
-          <TabsTrigger value="30dias">Até 30 dias</TabsTrigger>
+      <Tabs defaultValue="1-10dias">
+        <TabsList className="grid w-full max-w-xl grid-cols-4 mb-4">
+          <TabsTrigger value="1-10dias">1 À 10 DIAS</TabsTrigger>
+          <TabsTrigger value="11-20dias">DE 11 À 20 DIAS</TabsTrigger>
+          <TabsTrigger value="21-30dias">DE 21 À 30 DIAS</TabsTrigger>
+          <TabsTrigger value="31-40dias">DE 31 À 40 DIAS</TabsTrigger>
         </TabsList>
         <div className="p-4 sm:p-6 bg-card rounded-lg shadow-sm">
-            <TabsContent value="7dias">
-                <DataTable columns={columns} data={debts7days} />
+            <TabsContent value="1-10dias">
+                <DataTable columns={columns} data={debts1_10} />
             </TabsContent>
-            <TabsContent value="15dias">
-                <DataTable columns={columns} data={debts15days} />
+            <TabsContent value="11-20dias">
+                <DataTable columns={columns} data={debts11_20} />
             </TabsContent>
-            <TabsContent value="30dias">
-                <DataTable columns={columns} data={debts30days} />
+            <TabsContent value="21-30dias">
+                <DataTable columns={columns} data={debts21_30} />
+            </TabsContent>
+            <TabsContent value="31-40dias">
+                <DataTable columns={columns} data={debts31_40} />
             </TabsContent>
         </div>
       </Tabs>
