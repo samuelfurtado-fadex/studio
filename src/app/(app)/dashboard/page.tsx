@@ -20,6 +20,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
 import { addDays, format, startOfMonth, differenceInDays, subDays, startOfWeek, endOfWeek, startOfYear, endOfYear, subMonths, endOfMonth } from "date-fns";
+import { ptBR } from 'date-fns/locale';
 import { cn } from "@/lib/utils";
 
 const chartConfig: ChartConfig = {
@@ -306,9 +307,9 @@ export default function DashboardPage() {
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
                 <Calendar
+                    locale={ptBR}
                     initialFocus
                     mode="range"
-                    defaultMonth={chartType === 'daily' ? dailyDate?.from : monthlyDate?.from}
                     selected={chartType === 'daily' ? dailyDate : monthlyDate}
                     onSelect={chartType === 'daily' ? handleDailyDateSelect : handleMonthlyDateSelect}
                     numberOfMonths={chartType === 'daily' ? 1 : 2}
@@ -404,11 +405,11 @@ export default function DashboardPage() {
                     {monthlyDate?.from ? (
                       monthlyDate.to ? (
                         <>
-                          {format(monthlyDate.from, "dd/MM/yyyy")} -{" "}
-                          {format(monthlyDate.to, "dd/MM/yyyy")}
+                          {format(monthlyDate.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                          {format(monthlyDate.to, "dd/MM/yyyy", { locale: ptBR })}
                         </>
                       ) : (
-                        format(monthlyDate.from, "dd/MM/yyyy")
+                        format(monthlyDate.from, "dd/MM/yyyy", { locale: ptBR })
                       )
                     ) : (
                       <span>Período não selecionado</span>
@@ -444,11 +445,11 @@ export default function DashboardPage() {
                     {dailyDate?.from ? (
                       dailyDate.to ? (
                         <>
-                          {format(dailyDate.from, "dd/MM/yyyy")} -{" "}
-                          {format(dailyDate.to, "dd/MM/yyyy")}
+                          {format(dailyDate.from, "dd/MM/yyyy", { locale: ptBR })} -{" "}
+                          {format(dailyDate.to, "dd/MM/yyyy", { locale: ptBR })}
                         </>
                       ) : (
-                        format(dailyDate.from, "dd/MM/yyyy")
+                        format(dailyDate.from, "dd/MM/yyyy", { locale: ptBR })
                       )
                     ) : (
                       <span>Período não selecionado</span>
@@ -495,7 +496,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Vencimento:</span>
-                <span className="font-medium">{format(new Date(selectedDebt.dueDate), 'dd/MM/yyyy')}</span>
+                <span className="font-medium">{format(new Date(selectedDebt.dueDate), 'dd/MM/yyyy', { locale: ptBR })}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status:</span>

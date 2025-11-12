@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { format } from "date-fns";
+import { ptBR } from 'date-fns/locale';
 import { Phone, Mail, User, Briefcase, DollarSign, History, Send, FileText, Download, Loader2, Upload, CheckCircle, XCircle } from "lucide-react";
 
 import type { Coordinator } from "@/lib/data";
@@ -258,7 +259,7 @@ export default function CoordinatorProfileClientPage({ coordinator }: { coordina
                   <div key={debt.id} className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Dívida - {debt.projectName}</p>
-                      <p className="text-sm text-muted-foreground">Vencimento: {format(new Date(debt.dueDate), 'dd/MM/yyyy')}</p>
+                      <p className="text-sm text-muted-foreground">Vencimento: {format(new Date(debt.dueDate), 'dd/MM/yyyy', { locale: ptBR })}</p>
                     </div>
                     <div className="text-right">
                       <p className={`font-semibold ${debt.status === 'Pendente' ? 'text-destructive' : 'text-green-600'}`}>{formatCurrency(debt.value)}</p>
