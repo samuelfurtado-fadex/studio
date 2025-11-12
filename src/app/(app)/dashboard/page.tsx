@@ -19,7 +19,8 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { DateRange } from "react-day-picker";
-import { addDays, format, startOfMonth, differenceInDays } from "date-fns";
+import { addDays, format, startOfMonth, differenceInDays, subDays, startOfWeek, endOfWeek, startOfYear, endOfYear, subMonths, endOfMonth } from "date-fns";
+import { cn } from "@/lib/utils";
 
 const chartConfig: ChartConfig = {
   debts: {
@@ -43,6 +44,18 @@ const monthMap: { [key: string]: number } = {
   'Jul': 6, 'Ago': 7, 'Set': 8, 'Out': 9, 'Nov': 10, 'Dez': 11
 };
 
+const filterOptions = [
+    { label: 'Hoje', value: 'today' },
+    { label: 'Ontem', value: 'yesterday' },
+    { label: 'Semana', value: 'this-week' },
+    { label: 'Este Mês', value: 'this-month' },
+    { label: 'Mês Passado', value: 'last-month' },
+    { label: '90 dias', value: 'last-90-days' },
+    { label: 'Este Ano', value: 'this-year' },
+    { label: 'Ano Passado', value: 'last-year' },
+];
+
+
 export default function DashboardPage() {
   const totalPending = 9850.50;
   const totalAvailable = 39950.75;
@@ -52,27 +65,93 @@ export default function DashboardPage() {
 
   const [selectedDebt, setSelectedDebt] = useState<Debt | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  
+  const [dailyActiveFilter, setDailyActiveFilter] = useState('last-30-days');
+  const [monthlyActiveFilter, setMonthlyActiveFilter] = useState('this-year');
 
   const [dailyDate, setDailyDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 30),
   });
 
+  const [monthlyDate, setMonthlyDate] = useState<DateRange | undefined>({
+    from: startOfYear(new Date()),
+    to: endOfYear(new Date()),
+  });
+
+  const handleFilterChange = (filter: string, chartType: 'daily' | 'monthly') => {
+      const now = new Date();
+      let from: Date;
+      let to: Date;
+
+      switch (filter) {
+          case 'today':
+              from = now;
+              to = now;
+              break;
+          case 'yesterday':
+              from = subDays(now, 1);
+              to = subDays(now, 1);
+              break;
+          case 'this-week':
+              from = startOfWeek(now);
+              to = endOfWeek(now);
+              break;
+          case 'this-month':
+              from = startOfMonth(now);
+              to = endOfMonth(now);
+              break;
+          case 'last-month':
+              const lastMonth = subMonths(now, 1);
+              from = startOfMonth(lastMonth);
+              to = endOfMonth(lastMonth);
+              break;
+          case 'last-90-days':
+              from = subDays(now, 89);
+              to = now;
+              break;
+           case 'last-30-days':
+              from = subDays(now, 29);
+              to = now;
+              break;
+          case 'this-year':
+              from = startOfYear(now);
+              to = endOfYear(now);
+              break;
+          case 'last-year':
+              const lastYear = new Date(now.getFullYear() - 1, 0, 1);
+              from = startOfYear(lastYear);
+              to = endOfYear(lastYear);
+              break;
+          default:
+              return;
+      }
+      
+      if (chartType === 'daily') {
+        setDailyActiveFilter(filter);
+        setDailyDate({ from, to });
+      } else {
+        setMonthlyActiveFilter(filter);
+        setMonthlyDate({ from, to });
+      }
+  };
+
+
   const handleDailyDateSelect = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
       if (differenceInDays(range.to, range.from) > 31) {
-        // Do nothing or show a toast message
         return;
       }
     }
     setDailyDate(range);
+    setDailyActiveFilter('calendar');
   };
-
-  const [monthlyDate, setMonthlyDate] = useState<DateRange | undefined>({
-    from: new Date(new Date().getFullYear(), 0, 1),
-    to: new Date(new Date().getFullYear(), 11, 31),
-  });
   
+  const handleMonthlyDateSelect = (range: DateRange | undefined) => {
+    setMonthlyDate(range);
+    setMonthlyActiveFilter('calendar');
+  }
+
   const filteredDailyData = dailyDebtData.filter(item => {
     if (!dailyDate?.from) return true;
     const itemDate = new Date(dailyDate.from.getFullYear(), dailyDate.from.getMonth(), item.day);
@@ -94,13 +173,16 @@ export default function DashboardPage() {
     if (!monthlyDate?.from || !monthlyDate?.to) return true;
     const monthIndex = monthMap[item.month];
     if (monthIndex === undefined) return false;
-    const itemDate = new Date(new Date().getFullYear(), monthIndex, 1);
     
+    // Create a date that represents the first day of the month for comparison
+    const itemDate = new Date(monthlyDate.from.getFullYear(), monthIndex, 1);
+
     const fromDate = startOfMonth(monthlyDate.from);
-    const toDate = startOfMonth(monthlyDate.to);
+    const toDate = endOfMonth(monthlyDate.to);
 
     return itemDate >= fromDate && itemDate <= toDate;
-  });
+});
+
 
   const handleChartClick = (data: any, chartType: 'daily' | 'monthly') => {
     if (data && data.activePayload && data.activePayload.length > 0) {
@@ -161,6 +243,31 @@ export default function DashboardPage() {
         setIsDialogOpen(true);
     }
   }
+
+  const QuickFilter = ({ activeFilter, onFilterChange, onCalendarClick, chartType }: { activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, onCalendarClick: () => void, chartType: 'daily' | 'monthly' }) => (
+    <div className="flex flex-wrap items-center gap-2 mb-4">
+        {filterOptions.map(opt => (
+            <Button
+                key={opt.value}
+                variant={activeFilter === opt.value ? "default" : "outline"}
+                size="sm"
+                onClick={() => onFilterChange(opt.value, chartType)}
+                className="text-xs h-8"
+            >
+                {opt.label}
+            </Button>
+        ))}
+        <Button
+            variant={activeFilter === 'calendar' ? "default" : "outline"}
+            size="sm"
+            onClick={onCalendarClick}
+            className="text-xs h-8"
+        >
+          <CalendarIcon className="mr-2 h-4 w-4" />
+          Calendário
+        </Button>
+    </div>
+);
 
 
   return (
@@ -227,40 +334,42 @@ export default function DashboardPage() {
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-1">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className="w-[280px] justify-start text-left font-normal"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {monthlyDate?.from ? (
-                    monthlyDate.to ? (
-                      <>
-                        {format(monthlyDate.from, "LLL y")} -{" "}
-                        {format(monthlyDate.to, "LLL y")}
-                      </>
+          <CardHeader>
+              <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
+               <Popover>
+                  <PopoverTrigger asChild>
+                       <QuickFilter 
+                          activeFilter={monthlyActiveFilter} 
+                          onFilterChange={handleFilterChange}
+                          onCalendarClick={() => {}}
+                          chartType="monthly"
+                      />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={monthlyDate?.from}
+                          selected={monthlyDate}
+                          onSelect={handleMonthlyDateSelect}
+                          numberOfMonths={2}
+                      />
+                  </PopoverContent>
+              </Popover>
+               <p className="text-sm text-muted-foreground">
+                    {monthlyDate?.from ? (
+                      monthlyDate.to ? (
+                        <>
+                          {format(monthlyDate.from, "dd/MM/y")} -{" "}
+                          {format(monthlyDate.to, "dd/MM/y")}
+                        </>
+                      ) : (
+                        format(monthlyDate.from, "dd/MM/y")
+                      )
                     ) : (
-                      format(monthlyDate.from, "LLL y")
-                    )
-                  ) : (
-                    <span>Escolha um período</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={monthlyDate?.from}
-                  selected={monthlyDate}
-                  onSelect={setMonthlyDate}
-                  numberOfMonths={2}
-                />
-              </PopoverContent>
-            </Popover>
+                      <span>Período não selecionado</span>
+                    )}
+                </p>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
@@ -277,40 +386,42 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
             <CardTitle>Acompanhamento de Dívidas (Diário)</CardTitle>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant={"outline"}
-                  className="w-[280px] justify-start text-left font-normal"
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dailyDate?.from ? (
-                    dailyDate.to ? (
-                      <>
-                        {format(dailyDate.from, "dd/MM/y")} -{" "}
-                        {format(dailyDate.to, "dd/MM/y")}
-                      </>
+              <Popover>
+                  <PopoverTrigger asChild>
+                      <QuickFilter 
+                          activeFilter={dailyActiveFilter}
+                          onFilterChange={handleFilterChange}
+                          onCalendarClick={() => {}}
+                          chartType="daily"
+                      />
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="end">
+                      <Calendar
+                          initialFocus
+                          mode="range"
+                          defaultMonth={dailyDate?.from}
+                          selected={dailyDate}
+                          onSelect={handleDailyDateSelect}
+                          numberOfMonths={1}
+                      />
+                  </PopoverContent>
+              </Popover>
+               <p className="text-sm text-muted-foreground">
+                    {dailyDate?.from ? (
+                      dailyDate.to ? (
+                        <>
+                          {format(dailyDate.from, "dd/MM/y")} -{" "}
+                          {format(dailyDate.to, "dd/MM/y")}
+                        </>
+                      ) : (
+                        format(dailyDate.from, "dd/MM/y")
+                      )
                     ) : (
-                      format(dailyDate.from, "dd/MM/y")
-                    )
-                  ) : (
-                    <span>Escolha um período</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="end">
-                <Calendar
-                  initialFocus
-                  mode="range"
-                  defaultMonth={dailyDate?.from}
-                  selected={dailyDate}
-                  onSelect={handleDailyDateSelect}
-                  numberOfMonths={1}
-                />
-              </PopoverContent>
-            </Popover>
+                      <span>Período não selecionado</span>
+                    )}
+                </p>
           </CardHeader>
           <CardContent className="pl-2">
             <ChartContainer config={chartConfig} className="h-[300px] w-full">
