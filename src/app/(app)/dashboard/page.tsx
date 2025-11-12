@@ -266,9 +266,13 @@ export default function DashboardPage() {
         from.setHours(0, 0, 0, 0);
         to.setHours(23, 59, 59, 999);
 
+        if (dueDate.getFullYear() === from.getFullYear() && dueDate.getMonth() === from.getMonth()) {
+            return dueDate.getDate() === clickedDay;
+        }
+
         if (dueDate >= from && dueDate <= to) {
-            return dueDate.getDate() === clickedDay && 
-                   dueDate.getMonth() === from.getMonth() && 
+            return dueDate.getDate() === clickedDay &&
+                   dueDate.getMonth() === from.getMonth() &&
                    dueDate.getFullYear() === from.getFullYear();
         }
         return false;
@@ -391,7 +395,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
               <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
-               <div className="mt-4">
+               <div className="mt-6">
                 <QuickFilter 
                     options={monthlyFilterOptions}
                     activeFilter={monthlyActiveFilter} 
@@ -433,7 +437,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Acompanhamento de Dívidas (Diário)</CardTitle>
-              <div className="mt-4">
+              <div className="mt-6">
                 <QuickFilter 
                     options={dailyFilterOptions}
                     activeFilter={dailyActiveFilter}
@@ -513,8 +517,6 @@ export default function DashboardPage() {
 
     
   
-    
-
     
 
     
