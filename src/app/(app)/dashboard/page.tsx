@@ -282,7 +282,7 @@ export default function DashboardPage() {
   }
 
   const QuickFilter = ({ options, activeFilter, onFilterChange, chartType, isOpen, onOpenChange }: { options: {label: string, value: string}[], activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, chartType: 'daily' | 'monthly', isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) => (
-    <div className="flex flex-wrap items-center gap-2 mb-4">
+    <div className="flex flex-wrap items-center gap-2 mb-4 mt-4">
         {options.map(opt => (
             <Button
                 key={opt.value}
