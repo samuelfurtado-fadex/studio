@@ -404,11 +404,11 @@ export default function DashboardPage() {
                     {monthlyDate?.from ? (
                       monthlyDate.to ? (
                         <>
-                          {format(monthlyDate.from, "LLL dd, y")} -{" "}
-                          {format(monthlyDate.to, "LLL dd, y")}
+                          {format(monthlyDate.from, "dd/MM/yyyy")} -{" "}
+                          {format(monthlyDate.to, "dd/MM/yyyy")}
                         </>
                       ) : (
-                        format(monthlyDate.from, "LLL dd, y")
+                        format(monthlyDate.from, "dd/MM/yyyy")
                       )
                     ) : (
                       <span>Período não selecionado</span>
@@ -444,11 +444,11 @@ export default function DashboardPage() {
                     {dailyDate?.from ? (
                       dailyDate.to ? (
                         <>
-                          {format(dailyDate.from, "dd/MM/y")} -{" "}
-                          {format(dailyDate.to, "dd/MM/y")}
+                          {format(dailyDate.from, "dd/MM/yyyy")} -{" "}
+                          {format(dailyDate.to, "dd/MM/yyyy")}
                         </>
                       ) : (
-                        format(dailyDate.from, "dd/MM/y")
+                        format(dailyDate.from, "dd/MM/yyyy")
                       )
                     ) : (
                       <span>Período não selecionado</span>
@@ -495,7 +495,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Vencimento:</span>
-                <span className="font-medium">{format(selectedDebt.dueDate, 'dd/MM/yyyy')}</span>
+                <span className="font-medium">{format(new Date(selectedDebt.dueDate), 'dd/MM/yyyy')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Status:</span>
@@ -510,8 +510,6 @@ export default function DashboardPage() {
 
     
   
-    
-
     
 
     
