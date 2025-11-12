@@ -227,10 +227,19 @@ export default function DashboardPage() {
             const to = dailyDate.to ? new Date(dailyDate.to) : new Date(from);
             to.setHours(23, 59, 59, 999);
             
+            const itemDate = new Date(from.getFullYear(), from.getMonth(), clickedDay);
+            itemDate.setHours(0,0,0,0);
+            
             if (dueDate >= from && dueDate <= to) {
-                const itemDate = new Date(from.getFullYear(), from.getMonth(), clickedDay)
-                itemDate.setHours(0,0,0,0)
-                return dueDate.getDate() === clickedDay && dueDate.getMonth() === itemDate.getMonth() && dueDate.getFullYear() === itemDate.getFullYear();
+              const dueDateDay = dueDate.getDate();
+              const dueDateMonth = dueDate.getMonth();
+              const dueDateYear = dueDate.getFullYear();
+              
+              const clickedDateDay = itemDate.getDate();
+              const clickedDateMonth = itemDate.getMonth();
+              const clickedDateYear = itemDate.getFullYear();
+
+              return dueDateDay === clickedDateDay && dueDateMonth === clickedDateMonth && dueDateYear === clickedDateYear;
             }
             return false;
         });
@@ -265,15 +274,20 @@ export default function DashboardPage() {
 
         from.setHours(0, 0, 0, 0);
         to.setHours(23, 59, 59, 999);
-
-        if (dueDate.getFullYear() === from.getFullYear() && dueDate.getMonth() === from.getMonth()) {
-            return dueDate.getDate() === clickedDay;
-        }
+        
+        const itemDate = new Date(from.getFullYear(), from.getMonth(), clickedDay);
+        itemDate.setHours(0,0,0,0);
 
         if (dueDate >= from && dueDate <= to) {
-            return dueDate.getDate() === clickedDay &&
-                   dueDate.getMonth() === from.getMonth() &&
-                   dueDate.getFullYear() === from.getFullYear();
+            const dueDateDay = dueDate.getDate();
+            const dueDateMonth = dueDate.getMonth();
+            const dueDateYear = dueDate.getFullYear();
+            
+            const clickedDateDay = itemDate.getDate();
+            const clickedDateMonth = itemDate.getMonth();
+            const clickedDateYear = itemDate.getFullYear();
+
+            return dueDateDay === clickedDateDay && dueDateMonth === clickedDateMonth && dueDateYear === clickedDateYear;
         }
         return false;
     });
@@ -517,6 +531,8 @@ export default function DashboardPage() {
 
     
   
+    
+
     
 
     
