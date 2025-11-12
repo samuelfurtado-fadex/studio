@@ -77,6 +77,9 @@ export default function DashboardPage() {
   const [dailyActiveFilter, setDailyActiveFilter] = useState('last-30-days');
   const [monthlyActiveFilter, setMonthlyActiveFilter] = useState('this-year');
 
+  const [isDailyCalendarOpen, setDailyCalendarOpen] = useState(false);
+  const [isMonthlyCalendarOpen, setMonthlyCalendarOpen] = useState(false);
+
   const [dailyDate, setDailyDate] = useState<DateRange | undefined>({
     from: subDays(new Date(), 29),
     to: new Date(),
@@ -138,9 +141,11 @@ export default function DashboardPage() {
       if (chartType === 'daily') {
         setDailyActiveFilter(filter);
         setDailyDate({ from, to });
+        setDailyCalendarOpen(false);
       } else {
         setMonthlyActiveFilter(filter);
         setMonthlyDate({ from, to });
+        setMonthlyCalendarOpen(false);
       }
   };
 
@@ -154,11 +159,17 @@ export default function DashboardPage() {
     }
     setDailyDate(range);
     setDailyActiveFilter('calendar');
+    if (range?.from && range?.to) {
+      setDailyCalendarOpen(false);
+    }
   };
   
   const handleMonthlyDateSelect = (range: DateRange | undefined) => {
     setMonthlyDate(range);
     setMonthlyActiveFilter('calendar');
+    if (range?.from && range?.to) {
+      setMonthlyCalendarOpen(false);
+    }
   }
 
   const filteredDailyData = dailyDebtData.filter(item => {
@@ -183,9 +194,10 @@ export default function DashboardPage() {
     const monthIndex = monthMap[item.month];
     if (monthIndex === undefined) return false;
     
-    const itemYear = monthlyDate.from.getFullYear();
+    const itemYear = new Date().getFullYear(); // Assuming current year for monthly data
     const itemDate = new Date(itemYear, monthIndex, 1);
-
+  
+    // Create date objects that ignore time for comparison
     const fromDate = startOfMonth(monthlyDate.from);
     const toDate = endOfMonth(monthlyDate.to);
 
@@ -215,7 +227,9 @@ export default function DashboardPage() {
             to.setHours(23, 59, 59, 999);
             
             if (dueDate >= from && dueDate <= to) {
-                return dueDate.getDate() === clickedDay && dueDate.getMonth() === from.getMonth() && dueDate.getFullYear() === from.getFullYear();
+                const itemDate = new Date(from.getFullYear(), from.getMonth(), clickedDay)
+                itemDate.setHours(0,0,0,0)
+                return dueDate.getDate() === clickedDay && dueDate.getMonth() === itemDate.getMonth() && dueDate.getFullYear() === itemDate.getFullYear();
             }
             return false;
         });
@@ -253,7 +267,9 @@ export default function DashboardPage() {
         to.setHours(23, 59, 59, 999);
         
         if (dueDate >= from && dueDate <= to) {
-            return dueDate.getDate() === clickedDay && dueDate.getMonth() === from.getMonth() && dueDate.getFullYear() === from.getFullYear();
+            const itemDate = new Date(from.getFullYear(), from.getMonth(), clickedDay);
+            itemDate.setHours(0, 0, 0, 0);
+            return dueDate.getDate() === clickedDay && dueDate.getMonth() === itemDate.getMonth() && dueDate.getFullYear() === itemDate.getFullYear();
         }
         return false;
     });
@@ -264,7 +280,7 @@ export default function DashboardPage() {
     }
   }
 
-  const QuickFilter = ({ options, activeFilter, onFilterChange, onCalendarClick, chartType }: { options: {label: string, value: string}[], activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, onCalendarClick: () => void, chartType: 'daily' | 'monthly' }) => (
+  const QuickFilter = ({ options, activeFilter, onFilterChange, chartType, isOpen, onOpenChange }: { options: {label: string, value: string}[], activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, chartType: 'daily' | 'monthly', isOpen: boolean, onOpenChange: (isOpen: boolean) => void }) => (
     <div className="flex flex-wrap items-center gap-2 mb-4">
         {options.map(opt => (
             <Button
@@ -277,7 +293,7 @@ export default function DashboardPage() {
                 {opt.label}
             </Button>
         ))}
-        <Popover>
+        <Popover open={isOpen} onOpenChange={onOpenChange}>
             <PopoverTrigger asChild>
                 <Button
                     variant={activeFilter === 'calendar' ? "default" : "outline"}
@@ -297,7 +313,7 @@ export default function DashboardPage() {
                     onSelect={chartType === 'daily' ? handleDailyDateSelect : handleMonthlyDateSelect}
                     numberOfMonths={chartType === 'daily' ? 1 : 2}
                     disabled={chartType === 'daily' ? (date) => {
-                      if (dailyDate?.from) {
+                      if (dailyDate?.from && !dailyDate.to) {
                         const diff = differenceInDays(date, dailyDate.from);
                         return diff > 30 || diff < -30;
                       }
@@ -380,18 +396,19 @@ export default function DashboardPage() {
                   options={monthlyFilterOptions}
                   activeFilter={monthlyActiveFilter} 
                   onFilterChange={handleFilterChange}
-                  onCalendarClick={() => {}}
                   chartType="monthly"
+                  isOpen={isMonthlyCalendarOpen}
+                  onOpenChange={setMonthlyCalendarOpen}
               />
                <p className="text-sm text-muted-foreground">
                     {monthlyDate?.from ? (
                       monthlyDate.to ? (
                         <>
-                          {format(monthlyDate.from, "dd/MM/y")} -{" "}
-                          {format(monthlyDate.to, "dd/MM/y")}
+                          {format(monthlyDate.from, "LLL dd, y")} -{" "}
+                          {format(monthlyDate.to, "LLL dd, y")}
                         </>
                       ) : (
-                        format(monthlyDate.from, "dd/MM/y")
+                        format(monthlyDate.from, "LLL dd, y")
                       )
                     ) : (
                       <span>Período não selecionado</span>
@@ -419,8 +436,9 @@ export default function DashboardPage() {
                   options={dailyFilterOptions}
                   activeFilter={dailyActiveFilter}
                   onFilterChange={handleFilterChange}
-                  onCalendarClick={() => {}}
                   chartType="daily"
+                  isOpen={isDailyCalendarOpen}
+                  onOpenChange={setDailyCalendarOpen}
               />
                <p className="text-sm text-muted-foreground">
                     {dailyDate?.from ? (
@@ -498,3 +516,4 @@ export default function DashboardPage() {
 
     
 
+    
