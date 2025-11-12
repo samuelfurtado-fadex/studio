@@ -134,10 +134,26 @@ export default function DashboardPage() {
   const handleDotClick = (e: any) => {
     const { payload } = e;
     const clickedDay = payload.day;
-    const currentMonth = dailyDate?.from?.getMonth() ?? new Date().getMonth();
+
+    if (!dailyDate?.from) return;
+
+    // Find a debt that matches the day within the selected date range
     const debtToShow = debts.find(d => {
         const dueDate = new Date(d.dueDate);
-        return dueDate.getDate() === clickedDay && dueDate.getMonth() === currentMonth;
+        dueDate.setHours(0, 0, 0, 0);
+        
+        const from = new Date(dailyDate.from!);
+        from.setHours(0, 0, 0, 0);
+
+        const to = dailyDate.to ? new Date(dailyDate.to) : new Date(from);
+        to.setHours(0, 0, 0, 0);
+        
+        // Check if the due date of the debt is within the selected range
+        if (dueDate >= from && dueDate <= to) {
+            // Check if the day of the month matches the clicked day
+            return dueDate.getDate() === clickedDay;
+        }
+        return false;
     });
 
     if (debtToShow) {
