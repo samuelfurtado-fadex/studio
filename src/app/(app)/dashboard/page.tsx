@@ -44,7 +44,7 @@ const monthMap: { [key: string]: number } = {
   'Jul': 6, 'Ago': 7, 'Set': 8, 'Out': 9, 'Nov': 10, 'Dez': 11
 };
 
-const filterOptions = [
+const monthlyFilterOptions = [
     { label: 'Hoje', value: 'today' },
     { label: 'Ontem', value: 'yesterday' },
     { label: 'Semana', value: 'this-week' },
@@ -53,6 +53,14 @@ const filterOptions = [
     { label: '90 dias', value: 'last-90-days' },
     { label: 'Este Ano', value: 'this-year' },
     { label: 'Ano Passado', value: 'last-year' },
+];
+
+const dailyFilterOptions = [
+    { label: 'Hoje', value: 'today' },
+    { label: 'Ontem', value: 'yesterday' },
+    { label: 'Semana', value: 'this-week' },
+    { label: 'Este Mês', value: 'this-month' },
+    { label: 'Mês Passado', value: 'last-month' },
 ];
 
 
@@ -70,8 +78,8 @@ export default function DashboardPage() {
   const [monthlyActiveFilter, setMonthlyActiveFilter] = useState('this-year');
 
   const [dailyDate, setDailyDate] = useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 30),
+    from: subDays(new Date(), 29),
+    to: new Date(),
   });
 
   const [monthlyDate, setMonthlyDate] = useState<DateRange | undefined>({
@@ -140,6 +148,7 @@ export default function DashboardPage() {
   const handleDailyDateSelect = (range: DateRange | undefined) => {
     if (range?.from && range?.to) {
       if (differenceInDays(range.to, range.from) > 31) {
+        // Maybe show a toast message to the user
         return;
       }
     }
@@ -174,8 +183,8 @@ export default function DashboardPage() {
     const monthIndex = monthMap[item.month];
     if (monthIndex === undefined) return false;
     
-    // Create a date that represents the first day of the month for comparison
-    const itemDate = new Date(monthlyDate.from.getFullYear(), monthIndex, 1);
+    const itemYear = monthlyDate.from.getFullYear();
+    const itemDate = new Date(itemYear, monthIndex, 1);
 
     const fromDate = startOfMonth(monthlyDate.from);
     const toDate = endOfMonth(monthlyDate.to);
@@ -192,11 +201,25 @@ export default function DashboardPage() {
 
       if (chartType === 'daily') {
         const clickedDay = payload.day;
-        const currentMonth = dailyDate?.from?.getMonth() ?? new Date().getMonth();
+        
+        if (!dailyDate?.from) return;
+
         debtToShow = debts.find(d => {
-          const dueDate = new Date(d.dueDate);
-          return dueDate.getDate() === clickedDay && dueDate.getMonth() === currentMonth;
+            const dueDate = new Date(d.dueDate);
+            dueDate.setHours(0, 0, 0, 0);
+            
+            const from = new Date(dailyDate.from!);
+            from.setHours(0, 0, 0, 0);
+
+            const to = dailyDate.to ? new Date(dailyDate.to) : new Date(from);
+            to.setHours(23, 59, 59, 999);
+            
+            if (dueDate >= from && dueDate <= to) {
+                return dueDate.getDate() === clickedDay && dueDate.getMonth() === from.getMonth() && dueDate.getFullYear() === from.getFullYear();
+            }
+            return false;
         });
+
       } else if (chartType === 'monthly') {
         const clickedMonth = payload.month;
         const monthIndex = monthMap[clickedMonth];
@@ -219,7 +242,6 @@ export default function DashboardPage() {
 
     if (!dailyDate?.from) return;
 
-    // Find a debt that matches the day within the selected date range
     const debtToShow = debts.find(d => {
         const dueDate = new Date(d.dueDate);
         dueDate.setHours(0, 0, 0, 0);
@@ -228,12 +250,10 @@ export default function DashboardPage() {
         from.setHours(0, 0, 0, 0);
 
         const to = dailyDate.to ? new Date(dailyDate.to) : new Date(from);
-        to.setHours(0, 0, 0, 0);
+        to.setHours(23, 59, 59, 999);
         
-        // Check if the due date of the debt is within the selected range
         if (dueDate >= from && dueDate <= to) {
-            // Check if the day of the month matches the clicked day
-            return dueDate.getDate() === clickedDay;
+            return dueDate.getDate() === clickedDay && dueDate.getMonth() === from.getMonth() && dueDate.getFullYear() === from.getFullYear();
         }
         return false;
     });
@@ -244,9 +264,9 @@ export default function DashboardPage() {
     }
   }
 
-  const QuickFilter = ({ activeFilter, onFilterChange, onCalendarClick, chartType }: { activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, onCalendarClick: () => void, chartType: 'daily' | 'monthly' }) => (
+  const QuickFilter = ({ options, activeFilter, onFilterChange, onCalendarClick, chartType }: { options: {label: string, value: string}[], activeFilter: string, onFilterChange: (filter: string, chartType: 'daily' | 'monthly') => void, onCalendarClick: () => void, chartType: 'daily' | 'monthly' }) => (
     <div className="flex flex-wrap items-center gap-2 mb-4">
-        {filterOptions.map(opt => (
+        {options.map(opt => (
             <Button
                 key={opt.value}
                 variant={activeFilter === opt.value ? "default" : "outline"}
@@ -257,15 +277,35 @@ export default function DashboardPage() {
                 {opt.label}
             </Button>
         ))}
-        <Button
-            variant={activeFilter === 'calendar' ? "default" : "outline"}
-            size="sm"
-            onClick={onCalendarClick}
-            className="text-xs h-8"
-        >
-          <CalendarIcon className="mr-2 h-4 w-4" />
-          Calendário
-        </Button>
+        <Popover>
+            <PopoverTrigger asChild>
+                <Button
+                    variant={activeFilter === 'calendar' ? "default" : "outline"}
+                    size="sm"
+                    className="text-xs h-8"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  Calendário
+                </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                    initialFocus
+                    mode="range"
+                    defaultMonth={chartType === 'daily' ? dailyDate?.from : monthlyDate?.from}
+                    selected={chartType === 'daily' ? dailyDate : monthlyDate}
+                    onSelect={chartType === 'daily' ? handleDailyDateSelect : handleMonthlyDateSelect}
+                    numberOfMonths={chartType === 'daily' ? 1 : 2}
+                    disabled={chartType === 'daily' ? (date) => {
+                      if (dailyDate?.from) {
+                        const diff = differenceInDays(date, dailyDate.from);
+                        return diff > 30 || diff < -30;
+                      }
+                      return false;
+                    } : undefined}
+                />
+            </PopoverContent>
+        </Popover>
     </div>
 );
 
@@ -336,26 +376,13 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
               <CardTitle>Acompanhamento de Dívidas (Mensal)</CardTitle>
-               <Popover>
-                  <PopoverTrigger asChild>
-                       <QuickFilter 
-                          activeFilter={monthlyActiveFilter} 
-                          onFilterChange={handleFilterChange}
-                          onCalendarClick={() => {}}
-                          chartType="monthly"
-                      />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar
-                          initialFocus
-                          mode="range"
-                          defaultMonth={monthlyDate?.from}
-                          selected={monthlyDate}
-                          onSelect={handleMonthlyDateSelect}
-                          numberOfMonths={2}
-                      />
-                  </PopoverContent>
-              </Popover>
+               <QuickFilter 
+                  options={monthlyFilterOptions}
+                  activeFilter={monthlyActiveFilter} 
+                  onFilterChange={handleFilterChange}
+                  onCalendarClick={() => {}}
+                  chartType="monthly"
+              />
                <p className="text-sm text-muted-foreground">
                     {monthlyDate?.from ? (
                       monthlyDate.to ? (
@@ -388,26 +415,13 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Acompanhamento de Dívidas (Diário)</CardTitle>
-              <Popover>
-                  <PopoverTrigger asChild>
-                      <QuickFilter 
-                          activeFilter={dailyActiveFilter}
-                          onFilterChange={handleFilterChange}
-                          onCalendarClick={() => {}}
-                          chartType="daily"
-                      />
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="end">
-                      <Calendar
-                          initialFocus
-                          mode="range"
-                          defaultMonth={dailyDate?.from}
-                          selected={dailyDate}
-                          onSelect={handleDailyDateSelect}
-                          numberOfMonths={1}
-                      />
-                  </PopoverContent>
-              </Popover>
+              <QuickFilter 
+                  options={dailyFilterOptions}
+                  activeFilter={dailyActiveFilter}
+                  onFilterChange={handleFilterChange}
+                  onCalendarClick={() => {}}
+                  chartType="daily"
+              />
                <p className="text-sm text-muted-foreground">
                     {dailyDate?.from ? (
                       dailyDate.to ? (
@@ -483,3 +497,4 @@ export default function DashboardPage() {
     
 
     
+
