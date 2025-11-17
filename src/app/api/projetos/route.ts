@@ -1,13 +1,13 @@
+// src/app/api/projetos/route.ts
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getProjectsFromDB } from '@/services/projectService';
 
 export async function GET() {
-  console.log('DATABASE_URL:', process.env.DATABASE_URL);
   try {
-    const projetos = await prisma.projeto.findMany();
+    const projetos = await getProjectsFromDB();
     return NextResponse.json(projetos);
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch projetos' }, { status: 500 });
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
 }

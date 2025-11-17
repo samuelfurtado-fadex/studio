@@ -1,24 +1,20 @@
+// src/app/api/coordenadores/route.ts
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getCoordinatorsFromDB } from '@/services/coordinatorService';
 
+// Esta função responde a requisições GET para /api/coordenadores
 export async function GET() {
-  console.log('DATABASE_URL (coordenadores):', process.env.DATABASE_URL);
   try {
-    type ProjetoEmail = { email_coordenador: string | null };
+    const coordinators = await getCoordinatorsFromDB();
 
-    const projetos = (await prisma.projeto.findMany({
-      select: {
-        email_coordenador: true,
-      },
-      distinct: ['email_coordenador'],
-    })) as ProjetoEmail[];
-
-    const coordenadores = projetos
-      .map((proj: ProjetoEmail) => ({ email: proj.email_coordenador }))
-      .filter((coord): coord is { email: string } => Boolean(coord.email));
-    return NextResponse.json(coordenadores);
+    // Retorna a lista de coordenadores (no formato esperado pelo frontend)
+    return NextResponse.json(coordinators, { status: 200 });
   } catch (error) {
+    // Em caso de erro (ex: falha na conexão com o DB), retorna 500
     console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch coordenadores' }, { status: 500 });
+    return NextResponse.json(
+      { message: (error as Error).message || 'Erro interno do servidor ao buscar coordenadores.' },
+      { status: 500 }
+    );
   }
 }

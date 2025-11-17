@@ -1,21 +1,13 @@
+// src/app/api/alertas/route.ts
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { getAlertsFromDB } from '@/services/alertService';
 
 export async function GET() {
   try {
-    const solicitacoes = await prisma.solicitacoes.findMany({
-      include: {
-        projeto: true,
-        rubrica: true,
-        status: true,
-        dupla: true,
-        supridor: true,
-      },
-    });
-    return NextResponse.json(solicitacoes);
-  } catch (error)
-{
+    const alertas = await getAlertsFromDB();
+    return NextResponse.json(alertas);
+  } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: 'Failed to fetch alertas' }, { status: 500 });
+    return NextResponse.json({ error: (error as Error).message }, { status: 500 });
   }
 }
