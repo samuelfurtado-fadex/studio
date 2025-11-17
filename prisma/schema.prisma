@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model dupla {
+  id_dupla     Int            @id(map: "dim_dupla_pkey") @default(autoincrement())
+  nome         String         @unique(map: "dim_dupla_nome_key")
+  solicitacoes solicitacoes[]
+}
+
+model projeto {
+  id_projeto        Int            @id(map: "dim_projeto_pkey") @default(autoincrement())
+  conta             String         @unique(map: "dim_projeto_conta_key")
+  nome_projeto      String?
+  email_coordenador String?
+  solicitacoes      solicitacoes[]
+}
+
+model rubrica {
+  id_rubrica   Int            @id(map: "dim_rubrica_pkey") @default(autoincrement())
+  nome         String         @unique(map: "dim_rubrica_nome_key")
+  solicitacoes solicitacoes[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model solicitacoes {
+  id_solicitacao   Int       @id(map: "fatos_solicitacoes_pkey") @default(autoincrement())
+  id_projeto       Int?
+  id_supridor      Int?
+  id_rubrica       Int?
+  id_status        Int?
+  id_dupla         Int?
+  num_solicitacao  String?
+  data_solicitacao DateTime? @db.Date
+  data_prazo       DateTime? @db.Date
+  dias_prazo       Int?
+  valor            Decimal?  @db.Decimal(15, 2)
+  valor_devolucao  Decimal?  @db.Decimal(15, 2)
+  valor_doacao     Decimal?  @db.Decimal(15, 2)
+  observacao       String?
+  dupla            dupla?    @relation(fields: [id_dupla], references: [id_dupla], onDelete: NoAction, onUpdate: NoAction, map: "fatos_solicitacoes_id_dupla_fkey")
+  projeto          projeto?  @relation(fields: [id_projeto], references: [id_projeto], onDelete: NoAction, onUpdate: NoAction, map: "fatos_solicitacoes_id_projeto_fkey")
+  rubrica          rubrica?  @relation(fields: [id_rubrica], references: [id_rubrica], onDelete: NoAction, onUpdate: NoAction, map: "fatos_solicitacoes_id_rubrica_fkey")
+  status           status?   @relation(fields: [id_status], references: [id_status], onDelete: NoAction, onUpdate: NoAction, map: "fatos_solicitacoes_id_status_fkey")
+  supridor         supridor? @relation(fields: [id_supridor], references: [id_supridor], onDelete: NoAction, onUpdate: NoAction, map: "fatos_solicitacoes_id_supridor_fkey")
+
+  @@index([data_solicitacao], map: "idx_fatos_data_solicitacao")
+  @@index([id_dupla], map: "idx_fatos_id_dupla")
+  @@index([id_projeto], map: "idx_fatos_id_projeto")
+  @@index([id_rubrica], map: "idx_fatos_id_rubrica")
+  @@index([id_status], map: "idx_fatos_id_status")
+  @@index([id_supridor], map: "idx_fatos_id_supridor")
+}
+
+model status {
+  id_status    Int            @id(map: "dim_status_pkey") @default(autoincrement())
+  nome         String         @unique(map: "dim_status_nome_key")
+  solicitacoes solicitacoes[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model stg_2023 {
+  conta     String?
+  projeto   String?
+  supridor  String?
+  rubrica   String?
+  data      String?
+  prazo     String?
+  status    String?
+  dias      String?
+  valor     String?
+  devolucao String?
+  doacao    String?
+  obs       String?
+  dupla     String?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model stg_2025 {
+  conta              String?
+  solicitacao        String?
+  projeto            String?
+  supridor           String?
+  rubrica            String?
+  data               String?
+  prazo              String?
+  status             String?
+  dias               String?
+  valor              String?
+  devolucao          String?
+  doacao             String?
+  obs                String?
+  dupla              String?
+  email_coordenador  String?
+  coluna_vazia_final String?
+
+  @@ignore
+}
+
+model supridor {
+  id_supridor  Int            @id(map: "dim_supridor_pkey") @default(autoincrement())
+  nome         String         @unique(map: "dim_supridor_nome_key")
+  solicitacoes solicitacoes[]
+}
