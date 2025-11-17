@@ -6,43 +6,80 @@ import { PageHeader } from "@/components/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DataTable } from "@/components/data-table/data-table";
 import { columns } from "@/components/data-table/columns-alertas";
-import { debts, type Debt } from "@/lib/data";
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface Alerta {
+  id: number;
+  coordinatorName: string;
+  coordinatorEmail: string;
+  projectName: string;
+  value: number;
+  dueDate: string;
+  status: string;
+}
 
 export default function AlertasClientPage() {
-  const [debts1_10, setDebts1_10] = useState<Debt[]>([]);
-  const [debts11_20, setDebts11_20] = useState<Debt[]>([]);
-  const [debts21_30, setDebts21_30] = useState<Debt[]>([]);
-  const [debts31_40, setDebts31_40] = useState<Debt[]>([]);
-  const [isClient, setIsClient] = useState(false);
+  const [debts1_10, setDebts1_10] = useState<Alerta[]>([]);
+  const [debts11_20, setDebts11_20] = useState<Alerta[]>([]);
+  const [debts21_30, setDebts21_30] = useState<Alerta[]>([]);
+  const [debts31_40, setDebts31_40] = useState<Alerta[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsClient(true);
-    
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch('/api/alertas');
+        if (!res.ok) {
+          throw new Error('Failed to fetch alertas');
+        }
+        const solicitacoes = await res.json();
 
-    const filterDebtsByRange = (startDay: number, endDay: number) => {
-      const startDate = new Date(today);
-      startDate.setDate(today.getDate() + startDay);
-      
-      const endDate = new Date(today);
-      endDate.setDate(today.getDate() + endDay);
+        const mappedAlertas: Alerta[] = solicitacoes
+          .filter((s: any) => s.status?.nome === 'Pendente' && s.data_prazo)
+          .map((s: any) => ({
+            id: s.id_solicitacao,
+            coordinatorName: s.projeto?.email_coordenador || 'N/A',
+            coordinatorEmail: s.projeto?.email_coordenador || '',
+            projectName: s.projeto?.nome_projeto || 'N/A',
+            value: s.valor,
+            dueDate: s.data_prazo,
+            status: s.status.nome,
+          }));
 
-      return debts.filter(d => {
-        const dueDate = new Date(d.dueDate);
-        return dueDate >= startDate && dueDate <= endDate && d.status === 'Pendente';
-      });
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        const filterDebtsByRange = (startDay: number, endDay: number) => {
+          const startDate = new Date(today);
+          startDate.setDate(today.getDate() + startDay);
+          
+          const endDate = new Date(today);
+          endDate.setDate(today.getDate() + endDay);
+
+          return mappedAlertas.filter(d => {
+            const dueDate = new Date(d.dueDate);
+            return dueDate >= startDate && dueDate <= endDate;
+          });
+        };
+
+        setDebts1_10(filterDebtsByRange(1, 10));
+        setDebts11_20(filterDebtsByRange(11, 20));
+        setDebts21_30(filterDebtsByRange(21, 30));
+        setDebts31_40(filterDebtsByRange(31, 40));
+
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setDebts1_10(filterDebtsByRange(1, 10));
-    setDebts11_20(filterDebtsByRange(11, 20));
-    setDebts21_30(filterDebtsByRange(21, 30));
-    setDebts31_40(filterDebtsByRange(31, 40));
-
+    fetchData();
   }, []);
 
-  if (!isClient) {
-    // Render a placeholder or loading state on the server
+  if (loading) {
     return (
         <>
             <PageHeader title="Alertas de Vencimento" />
@@ -54,11 +91,17 @@ export default function AlertasClientPage() {
                   <TabsTrigger value="31-40dias">DE 31 À 40 DIAS</TabsTrigger>
                 </TabsList>
                 <div className="p-4 sm:p-6 bg-card rounded-lg shadow-sm">
-                    <p>Carregando...</p>
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full mt-4" />
+                    <Skeleton className="h-12 w-full mt-4" />
                 </div>
             </Tabs>
         </>
     );
+  }
+
+  if (error) {
+    return <div className="text-red-500">Erro ao carregar alertas: {error}</div>;
   }
 
   return (
