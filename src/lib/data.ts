@@ -1,11 +1,11 @@
 
 export type Coordinator = {
   id: string;
-  name: string;
-  project: string;
+  name: string | null;
+  project: string | null;
   pendingBalance: number;
   availableBalance: number;
-  email: string;
+  email: string | null;
   phone: string;
   cpf: string;
   avatar: string;

@@ -15,22 +15,32 @@ interface Project {
   };
   coordinatorId: string | null;
 
-export async function getProjectsFromDB(): Promise<Project[]> {
-  try {
-    const projectsFromDb = await prisma.projeto.findMany();
-
-    const projects = projectsFromDb.map((p) => ({
-      id: p.id_projeto,
-      name: p.nome_projeto || 'Nome não definido',
-      code: p.conta,
-      status: 'Ativo', // Placeholder
-      budget: { current: 50000, total: 100000 }, // Placeholder
-      coordinatorId: p.email_coordenador,
-    }));
-
-    return projects;
-  } catch (error) {
-    console.error("Erro ao buscar projetos do DB:", error);
-    throw new Error("Falha na operação de busca de projetos.");
-  }
 }
+
+export async function getProjectsFromDB(): Promise<Project[]> {
+    try {
+      type ProjectRow = {
+        id_projeto: number;
+        nome_projeto?: string | null;
+        conta: string;
+        email_coordenador?: string | null;
+      };
+
+      const projectsFromDb = (await prisma.projeto.findMany()) as ProjectRow[];
+
+      const projects: Project[] = projectsFromDb.map((p) => ({
+        id: p.id_projeto,
+        name: p.nome_projeto ?? 'Nome não definido',
+        code: p.conta,
+        status: 'Ativo', // Placeholder
+        budget: { current: 50000, total: 100000 }, // Placeholder
+        coordinatorId: p.email_coordenador ?? null,
+      }));
+
+      return projects;
+    } catch (error) {
+      console.error('Erro ao buscar projetos do DB:', error);
+      throw new Error('Falha na operação de busca de projetos.');
+    }
+
+  }
